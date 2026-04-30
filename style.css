@@ -818,6 +818,69 @@ footer {
 }
 
 /* ============================================================
+   MUSIC
+   ============================================================ */
+.music-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.music-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.3s, transform 0.3s;
+}
+
+.music-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+
+.music-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.music-tag {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.music-ext {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  transition: color 0.2s;
+}
+
+.music-ext:hover { color: var(--accent); }
+
+.music-card h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+
+.music-card p {
+  font-size: 0.9rem;
+  color: #777;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+  flex: 1;
+}
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 900px) {
@@ -838,6 +901,7 @@ footer {
   .about-stats { grid-template-columns: 1fr 1fr; }
   
   .skills-grid { grid-template-columns: 1fr 1fr; }
+  .music-grid { grid-template-columns: 1fr; }
   
   .project-item { grid-template-columns: 1fr; gap: 0.75rem; }
   .project-meta { flex-direction: row; align-items: center; gap: 1rem; }

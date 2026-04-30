@@ -1,128 +1,106 @@
-# danielsheils.github.io — Portfolio Site
+# Daniel Sheils
 
-A personal portfolio for **Daniel Sheils** — sound designer, music producer, game developer, visual artist, and creative technologist. Built as a static site with vanilla HTML, CSS, and JavaScript. No frameworks, no build step, no dependencies — just open and ship.
+**Sound Designer · Music Producer · Game Developer · Visual Artist · Creative Technologist**
 
-**Live site:** [https://rhythrosalabs.github.io](https://rhythrosalabs.github.io)
+Based in Missoula, MT · Open to remote collaborations worldwide
+
+[rhythrosalabs.github.io](https://rhythrosalabs.github.io) · [Portfolio](https://danielsheils.myportfolio.com) · [GitHub](https://github.com/RhythrosaLabs) · [Scatterboxx](https://scatterboxx.bandcamp.com) · [Noodlebake Records](https://noodlebakerecords.bandcamp.com)
 
 ---
 
 ## About
 
-This site was designed to mirror the aesthetic of modern developer/product landing pages — dark terminal feel, bold typographic hierarchy, smooth scroll-triggered animations — while showcasing a creative career spanning 18+ years across:
+I'm Daniel Sheils — a multi-disciplinary creative whose work spans sound design, music production, game development, visual arts, interactive media, robotics, and AI-powered software. I've been doing this since 2008 and still find new territory to explore at every intersection of those fields.
 
-- Sound design (AR/VR/XR, game audio, spatial audio)
-- Music production (nearly 30 solo albums, studio & live collaboration)
-- Game development (Unity — *Prism Rider*, *Something Is Missing*)
-- AI-powered creative software (*brAInstormer*, *Game Maker*, *Soundstorm*, *DuoGPT*)
-- Visual arts (album covers, music videos, 3D assets, branding)
-- Teaching (game design & generative AI at Westport Library)
+I founded and run **Noodlebake Records**, an independent multi-genre label and boutique shop out of Connecticut. As **Scatterboxx**, I've written and recorded nearly 30 solo albums. As a sound designer, I've built immersive AR/VR/XR soundscapes for enterprise clients including **Microsoft, Intel, Amazon, and Red Bull**. I'm an official **Streamlit Creator**, recognized for building autonomous AI tools for creative industries.
+
+My code-side work tends toward big-idea tools: all-in-one creative suites, AI agents with 190+ connectors, autonomous business platforms, record label management systems, browser-based DAWs, and multi-agent video pipelines. I taught myself to code to build things that didn't exist yet.
 
 ---
 
-## Tech Stack
+---
 
-| Layer | Choice |
+## Music
+
+### Scatterboxx
+My solo music project. Writer, producer, and engineer behind nearly 30 albums spanning experimental, electronic, indie, and beyond — from *The Electric Organism* and *Hypomanic Carnival* to *The Bells* and *Mushy House Party*.
+
+- [scatterboxx.bandcamp.com](https://scatterboxx.bandcamp.com)
+
+### Noodlebake Records
+Independent multi-genre record label and boutique shop I founded and operate. Home to Scatterboxx, Big Empty Zero, Echo Encoder, and more. Releases music, sample packs, merch, skateboard decks, and original games.
+
+- [noodlebakerecords.bandcamp.com](https://noodlebakerecords.bandcamp.com)
+
+### Sidestep Complex *(former collaboration)*
+A 15+ year musical collaboration blending violin artistry, avant-garde composition, intricate lyricism, and innovative production. Multiple albums released under Noodlebake Records including *LOVE + GUTS XV*, *The Diamond Eyes of Saturn*, *Moon Science*, and more.
+
+- [hzoftheheart.bandcamp.com](https://hzoftheheart.bandcamp.com)
+
+---
+
+## Software Projects
+
+| Project | Description | Stack |
+|---|---|---|
+| **[Otto-mate 2](https://github.com/RhythrosaLabs/otto-mate-2)** | Universal AI agent workbench — 190+ connectors, browser automation, multimedia suite, visual pipelines, 200+ skills, cron scheduler | TypeScript |
+| **[brAInstormer 3.0](https://github.com/RhythrosaLabs/brainstormer-4)** | All-in-one AI creative suite — chat, image editor, audio DAW, video editor, 3D viewer, code editor | Python / Streamlit |
+| **[Autonomous Business Platform](https://github.com/RhythrosaLabs/autonomous-business-platform)** | Production-ready AI marketing automation, content generation, and e-commerce integration | Python / FastAPI |
+| **[LabelFlow](https://github.com/RhythrosaLabs/labelflow)** | Record label management platform with 15 fully featured modules | React 19 / Vite |
+| **[Soundstorm](https://github.com/RhythrosaLabs/soundstorm)** | AI-driven audio manipulation platform for sound designers and algorithmic composers | Python / Streamlit |
+| **[DuoGPT](https://github.com/RhythrosaLabs/DuoGPT)** | Experiment in dynamic AI-to-AI conversation — two GPT instances debate and collaborate autonomously | Python |
+| **[Game Maker](https://github.com/RhythrosaLabs/game-maker-public-dev)** | AI-accelerated game dev — concepts, assets, scripts, music, and 3D models | Python / Streamlit |
+| **[Multi-Agent Viral Video Maker](https://github.com/RhythrosaLabs/multi-agent-viral-video-maker)** | Longform HD video generation with music and voice via multi-agent AI pipelines | Python |
+| **[AI Blog Writer](https://github.com/RhythrosaLabs/ai-blog-writer)** | Browser-based AI blog writing studio — create, edit, publish, and share long-form content | Python / Streamlit |
+| **[Chromatic](https://github.com/RhythrosaLabs/chromatic)** | AI text-to-visual experience generator | TypeScript |
+| **[JobClaw](https://github.com/RhythrosaLabs/jobclaw)** | Autonomous AI job hunting agent — profile building, resume generation, company research, auto-apply | TypeScript |
+| **[Streamlit Components](https://github.com/RhythrosaLabs/streamlit-components-demo)** | Custom Streamlit components: Kanban, audio editor, node editor, stepper, video editor, Gantt chart | Python / TypeScript |
+
+---
+
+## Sound Design
+
+Specialized in immersive audio for **AR/VR/XR** installations, interactive game audio, and post-production.
+
+**Rock Paper Reality** (2022–present)
+- The Glenlivet Sample Room — mixed reality scotch-tasting experience
+- Play Like A Padre — AR installation at Petco Stadium (San Diego Padres / Motorola / Lenovo)
+- Red Bull Cliff Diving World Championship AR web app, Boston 2023
+- Alzheimer's Association AR Promise Garden
+- Various AR/XR web apps and installations for enterprise clients including Microsoft, Intel, and Amazon
+
+---
+
+## Game Development
+
+- **Prism Rider** — Karting game centered on auditory exploration. AI-generated visual assets, dynamic sound design responding to player movement. Built in Unity.
+- **Something Is Missing** — Interactive music video side-scroller. Built in Unity.
+- **Trinkets** — Interactive 3D portfolio built in Unity, experienced as a virtual museum of sound, art, and animation.
+
+---
+
+## Teaching & Community
+
+- **Streamlit Creator** (2025–present) — Official program member recognized for AI-powered creative tools
+- **Course Instructor**, The Westport Library (2023–2024) — Game design and generative AI / prompt engineering
+- **Lead Sound Technician**, Town of Greenwich, CT (2020–2022) — Live sound for all town concerts, festivals, and parades
+- Developed afterschool **music production curriculum** for middle school students in Massachusetts
+- Hosted and produced radio shows on **WEMF Radio** (Cambridge, MA) and **UNregular Radio** (Boston, MA)
+
+---
+
+## Links
+
+| | |
 |---|---|
-| Markup | HTML5 (semantic) |
-| Styles | CSS3 (custom properties, Grid, Flexbox, animations) |
-| Scripting | Vanilla JavaScript (ES2020+) |
-| Fonts | Google Fonts — Space Grotesk + Space Mono |
-| Hosting | GitHub Pages (auto-deploy from `main`) |
-
-No npm. No bundler. No framework. The entire site is three files.
-
----
-
-## File Structure
-
-```
-/
-├── index.html    # All markup and content
-├── style.css     # All styles, layout, animations, responsive rules
-├── script.js     # Cursor, scroll animations, glitch effect, parallax
-└── README.md
-```
+| Live Portfolio Site | [rhythrosalabs.github.io](https://rhythrosalabs.github.io) |
+| Portfolio (Adobe) | [danielsheils.myportfolio.com](https://danielsheils.myportfolio.com) |
+| GitHub | [github.com/RhythrosaLabs](https://github.com/RhythrosaLabs) |
+| Scatterboxx | [scatterboxx.bandcamp.com](https://scatterboxx.bandcamp.com) |
+| Noodlebake Records | [noodlebakerecords.bandcamp.com](https://noodlebakerecords.bandcamp.com) |
+| Sidestep Complex | [hzoftheheart.bandcamp.com](https://hzoftheheart.bandcamp.com) |
 
 ---
 
-## Features
+*© 2026 Daniel Sheils · [MIT License](LICENSE)*
 
-### Visual / UX
-- **Custom cursor** — glowing dot with a trailing ring; scales on hover over interactive elements
-- **Animated background grid** — subtle CSS grid with radial-gradient mask
-- **Noise overlay** — SVG fractal noise for texture
-- **Hero entrance animation** — staggered `translateY` slide-ins on page load
-- **Glitch text effect** — hover the hero title letters to trigger a character-scramble animation
-- **Scroll parallax** — hero title and sub-text shift at different rates on scroll
-
-### Scroll Animations (`IntersectionObserver`)
-- Skill blocks fade + slide up with configurable stagger delay (`data-delay`)
-- Timeline items slide in from the left, staggered sequentially
-- Stat cards, project rows, and contact links fade up on first entry into viewport
-
-### Navigation
-- Sticky nav with blur backdrop
-- Active section highlighting as you scroll
-- Smooth-scroll anchor links
-
-### Sections
-1. **Hero** — Name, title, badge chips, CTAs, scroll indicator
-2. **About** — Bio paragraphs + animated stat cards
-3. **Skills** — 6-cell grid: Audio Engineering, Sound Design, Game Dev, AI & Software, Visual Arts, Music Production
-4. **Projects** — 6 featured works in a list layout with hover slide-bar indicator
-5. **Experience** — Full timeline from 2008 to present
-6. **Contact** — External links (portfolio, GitHub)
-
----
-
-## Updating Content
-
-All content lives directly in `index.html` — no CMS, no data files. To update:
-
-1. Edit `index.html` in any text editor
-2. Commit and push:
-   ```bash
-   git add .
-   git commit -m "update content"
-   git push
-   ```
-3. GitHub Pages redeploys automatically in ~30 seconds
-
----
-
-## Deploying Your Own Fork
-
-1. Fork this repo and rename it to `yourusername.github.io`
-2. GitHub Pages will auto-enable on the `main` branch
-3. Your site will be live at `https://yourusername.github.io`
-
-No configuration needed.
-
----
-
-## Design Decisions
-
-- **No JavaScript framework** — the site is purely presentational. React/Vue would be unnecessary overhead.
-- **CSS custom properties** — the entire color palette lives in `:root` vars, making a theme swap a one-file edit.
-- **`IntersectionObserver` over scroll events** — far more performant for scroll-triggered animations; no `requestAnimationFrame` loop needed.
-- **`mix-blend-mode: difference`** on the cursor dot — creates an inversion effect over any element without needing separate cursor states per element.
-- **Monospace + geometric sans pairing** — Space Mono for labels/tags/code-like elements; Space Grotesk for headings and body.
-
----
-
-## Privacy Notes
-
-- No analytics, tracking scripts, or cookies
-- No contact form — no server, no data collection
-- No email address published (to avoid scraping)
-- All outbound links open in a new tab with `target="_blank"`
-
----
-
-## License
-
-MIT — feel free to fork and adapt for your own portfolio. Attribution appreciated but not required.
-
----
-
-*Built with ♪ & code by Daniel Sheils — 2026*
