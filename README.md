@@ -12,7 +12,7 @@ Based in Missoula, MT · Open to remote collaborations worldwide
 
 I'm Daniel Sheils — a multi-disciplinary creative whose work spans sound design, music production, game development, visual arts, interactive media, robotics, and AI-powered software. I've been doing this since 2008 and still find new territory to explore at every intersection of those fields.
 
-I founded and run **Noodlebake Records**, an independent multi-genre label and boutique shop out of Connecticut. As **Scatterboxx**, I've written and recorded nearly 30 solo albums. As a sound designer, I've built immersive AR/VR/XR soundscapes for enterprise clients including **Microsoft, Intel, Amazon, and Red Bull**. I'm an official **Streamlit Creator**, recognized for building autonomous AI tools for creative industries.
+I founded and run **Noodlebake Records**, an independent multi-genre label and boutique shop out of Connecticut. As **Scatterboxx**, I've written and recorded nearly 30 solo albums. As a sound designer, I've built immersive AR/VR/XR soundscapes for enterprise clients including **Red Bull, Microsoft, Intel, Amazon, Motorola, Lenovo, San Diego Padres, The Glenlivet,** and the **Alzheimer's Association**. I'm an official **Streamlit Creator**, recognized for building autonomous AI tools for creative industries.
 
 My code-side work tends toward big-idea tools: all-in-one creative suites, AI agents with 190+ connectors, autonomous business platforms, record label management systems, browser-based DAWs, and multi-agent video pipelines. I taught myself to code to build things that didn't exist yet.
 
@@ -63,11 +63,13 @@ A 15+ year musical collaboration blending violin artistry, avant-garde compositi
 Specialized in immersive audio for **AR/VR/XR** installations, interactive game audio, and post-production.
 
 **Rock Paper Reality** (2022–present)
-- The Glenlivet Sample Room — mixed reality scotch-tasting experience
-- Play Like A Padre — AR installation at Petco Stadium (San Diego Padres / Motorola / Lenovo)
-- Red Bull Cliff Diving World Championship AR web app, Boston 2023
-- Alzheimer's Association AR Promise Garden
-- Various AR/XR web apps and installations for enterprise clients including Microsoft, Intel, and Amazon
+Full client list: Red Bull, Microsoft, Intel, Amazon, Motorola, Lenovo, San Diego Padres, The Glenlivet, Alzheimer's Association
+
+- **The Glenlivet Sample Room** — mixed reality scotch-tasting experience
+- **Play Like A Padre** — AR installation at Petco Stadium (San Diego Padres / Motorola / Lenovo)
+- **Red Bull Cliff Diving World Championship** AR web app, Boston 2023
+- **Alzheimer's Association** AR Promise Garden
+- Additional AR/XR web apps and installations for Microsoft, Intel, Amazon, and others
 
 ---
 
@@ -83,9 +85,12 @@ Specialized in immersive audio for **AR/VR/XR** installations, interactive game 
 
 - **Streamlit Creator** (2025–present) — Official program member recognized for AI-powered creative tools
 - **Course Instructor**, The Westport Library (2023–2024) — Game design and generative AI / prompt engineering
-- **Lead Sound Technician**, Town of Greenwich, CT (2020–2022) — Live sound for all town concerts, festivals, and parades
+- **Lead Sound Technician**, Town of Greenwich, CT (2020–2022) — Live sound at dozens of venues, concerts, festivals, and parades
 - Developed afterschool **music production curriculum** for middle school students in Massachusetts
+- Toured nationally as a performing musician multiple times
+- Podcast editing and production; radio stingers for **WEMF, WMBR, WPKN, NPR** affiliates, and more
 - Hosted and produced radio shows on **WEMF Radio** (Cambridge, MA) and **UNregular Radio** (Boston, MA)
+- Sound design credits on multiple **indie games** beyond personal Unity projects
 
 ---
 
