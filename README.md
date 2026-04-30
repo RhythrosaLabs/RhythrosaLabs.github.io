@@ -1,6 +1,6 @@
 # Daniel Sheils
 
-**Sound Designer · Music Producer · Game Developer · Visual Artist · Writer · Lyricist · Rapper · Creative Technologist**
+**Sound Designer · Music Producer · Game Developer · Visual Artist · Writer · Musician · Rapper · Software Designer · Creative Technologist**
 
 Based in Missoula, MT · Open to remote collaborations worldwide
 
