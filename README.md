@@ -4,7 +4,7 @@
 
 Based in Missoula, MT · Open to remote collaborations worldwide
 
-[rhythrosalabs.github.io](https://rhythrosalabs.github.io) · [Portfolio](https://danielsheils.myportfolio.com) · [GitHub](https://github.com/RhythrosaLabs) · [Scatterboxx](https://scatterboxx.bandcamp.com) · [Noodlebake Records](https://noodlebakerecords.bandcamp.com)
+[rhythrosalabs.github.io](https://rhythrosalabs.github.io) · [LinkedIn](https://www.linkedin.com/in/danielsheils) · [GitHub](https://github.com/RhythrosaLabs) · [Scatterboxx](https://scatterboxx.bandcamp.com) · [Noodlebake Records](https://noodlebakerecords.bandcamp.com)
 
 ---
 
@@ -43,8 +43,8 @@ A 15+ year musical collaboration blending violin artistry, avant-garde compositi
 
 | Project | Description | Stack |
 |---|---|---|
-| **[Otto-mate 2](https://github.com/RhythrosaLabs/otto-mate-2)** | Universal AI agent workbench — 190+ connectors, browser automation, multimedia suite, visual pipelines, 200+ skills, cron scheduler | TypeScript |
-| **[brAInstormer 3.0](https://github.com/RhythrosaLabs/brainstormer-4)** | All-in-one AI creative suite — chat, image editor, audio DAW, video editor, 3D viewer, code editor | Python / Streamlit |
+| **[Ottomate](https://github.com/RhythrosaLabs/otto-mate-2)** | Universal AI agent workbench — 190+ connectors, browser automation, multimedia suite, visual pipelines, 200+ skills, cron scheduler | TypeScript |
+| **[brAInstormer](https://github.com/RhythrosaLabs/brainstormer-4)** | All-in-one AI creative suite — chat, image editor, audio DAW, video editor, 3D viewer, code editor | Python / Streamlit |
 | **[Autonomous Business Platform](https://github.com/RhythrosaLabs/autonomous-business-platform)** | Production-ready AI marketing automation, content generation, and e-commerce integration | Python / FastAPI |
 | **[LabelFlow](https://github.com/RhythrosaLabs/labelflow)** | Record label management platform with 15 fully featured modules | React 19 / Vite |
 | **[Soundstorm](https://github.com/RhythrosaLabs/soundstorm)** | AI-driven audio manipulation platform for sound designers and algorithmic composers | Python / Streamlit |
@@ -98,8 +98,8 @@ Full client list: Red Bull, Microsoft, Intel, Amazon, Motorola, Lenovo, San Dieg
 
 | | |
 |---|---|
-| Live Portfolio Site | [rhythrosalabs.github.io](https://rhythrosalabs.github.io) |
-| Portfolio (Adobe) | [danielsheils.myportfolio.com](https://danielsheils.myportfolio.com) |
+| Live Site | [rhythrosalabs.github.io](https://rhythrosalabs.github.io) |
+| LinkedIn | [linkedin.com/in/danielsheils](https://www.linkedin.com/in/danielsheils) |
 | GitHub | [github.com/RhythrosaLabs](https://github.com/RhythrosaLabs) |
 | Scatterboxx | [scatterboxx.bandcamp.com](https://scatterboxx.bandcamp.com) |
 | Noodlebake Records | [noodlebakerecords.bandcamp.com](https://noodlebakerecords.bandcamp.com) |
