@@ -87,7 +87,7 @@ Full client list: Red Bull, Microsoft, Intel, Amazon, Motorola, Lenovo, San Dieg
 - **Course Instructor**, The Westport Library (2023–2024) — Game design and generative AI / prompt engineering
 - **Lead Sound Technician**, Town of Greenwich, CT (2020–2022) — Live sound at dozens of venues, concerts, festivals, and parades
 - Developed afterschool **music production curriculum** for middle school students in Massachusetts
-- Toured nationally as a performing musician multiple times (Scatterboxx and Sidestep Complex)
+- Toured nationally as a performing musician multiple times (Sidestep Complex)
 - Podcast editing and production; radio stingers for **WEMF, WMBR, WPKN, NPR** affiliates, and more
 - Hosted and produced radio shows on **WEMF Radio** (Cambridge, MA) and **UNregular Radio** (Boston, MA)
 - Sound design credits on multiple **indie games** beyond personal Unity projects
