@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daniel Sheils — Creative Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Noise overlay -->
+  <div class="noise"></div>
+
+  <!-- Animated background grid -->
+  <div class="bg-grid"></div>
+
+  <!-- Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-trail" id="cursorTrail"></div>
+
+  <!-- Nav -->
+  <nav id="nav">
+    <div class="nav-logo">DS<span class="blink">_</span></div>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#projects">Projects</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="hero">
+    <div class="hero-tag">SOUND · CODE · CREATION</div>
+    <h1 class="hero-title">
+      <span class="line" data-text="DANIEL">DANIEL</span>
+      <span class="line accent" data-text="SHEILS">SHEILS</span>
+    </h1>
+    <p class="hero-sub">
+      Sound Designer · Music Producer · Game Developer<br />
+      Visual Artist · Roboticist · Creative Technologist
+    </p>
+    <div class="hero-badges">
+      <span class="badge">~30 Solo Albums</span>
+      <span class="badge">AR/VR Sound Design</span>
+      <span class="badge">Streamlit Creator</span>
+      <span class="badge">Microsoft · Intel · Amazon · Red Bull</span>
+    </div>
+    <div class="hero-cta">
+      <a href="#projects" class="btn-primary">View Work</a>
+      <a href="https://danielsheils.myportfolio.com" target="_blank" class="btn-ghost">Portfolio Site ↗</a>
+    </div>
+    <div class="hero-scroll-indicator">
+      <div class="scroll-line"></div>
+      <span>SCROLL</span>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="section" id="about">
+    <div class="section-label">01 · ABOUT</div>
+    <div class="about-grid">
+      <div class="about-text">
+        <h2 class="section-title">An Artist Who<br /><span class="accent">Builds Things.</span></h2>
+        <p>
+          My work spans sound design, music, interactive media, game development, visual arts, robotics, and creative software. I've written &amp; recorded nearly 30 solo albums, produced and mixed with hundreds of musicians in both studio and live settings, and as a sound designer I've created immersive AR/VR soundscapes for clients including <strong>Microsoft, Intel, Amazon, Red Bull,</strong> and more.
+        </p>
+        <p>
+          In interactive media I've built original Unity games, AI-powered tools, and Trinkets — an interactive portfolio you can explore as a 3D virtual museum. As an official member of Streamlit's Creator program, I'm recognized for designing autonomous AI solutions for game design, marketing, and video production.
+        </p>
+        <p>
+          I've taught game design &amp; generative AI, led live sound teams for outdoor concerts, developed afterschool music production curriculum, and hosted multiple radio shows.
+        </p>
+      </div>
+      <div class="about-stats">
+        <div class="stat-card">
+          <div class="stat-num">~30</div>
+          <div class="stat-label">Solo Albums</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">18+</div>
+          <div class="stat-label">Years Experience</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">100s</div>
+          <div class="stat-label">Collaborations</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num">4+</div>
+          <div class="stat-label">Enterprise Clients</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section class="section section-dark" id="skills">
+    <div class="section-label">02 · SKILLS</div>
+    <h2 class="section-title">What I Do</h2>
+    <div class="skills-grid">
+      <div class="skill-block" data-delay="0">
+        <div class="skill-icon">♪</div>
+        <h3>Audio Engineering</h3>
+        <p>Tracking, mixing, editing, mastering, restoration. Post-production for all media formats. Spatial audio, Dolby Atmos, binaural, surround.</p>
+        <div class="skill-tags">
+          <span>Logic Pro</span><span>Pro Tools</span><span>Izotope RX</span><span>Ableton</span>
+        </div>
+      </div>
+      <div class="skill-block" data-delay="100">
+        <div class="skill-icon">◈</div>
+        <h3>Sound Design</h3>
+        <p>Immersive audio for AR/VR/XR. Interactive game audio and custom SFX. Soundscapes for enterprise installations.</p>
+        <div class="skill-tags">
+          <span>AR/VR/XR</span><span>Game Audio</span><span>Synthesis</span><span>Spatial Audio</span>
+        </div>
+      </div>
+      <div class="skill-block" data-delay="200">
+        <div class="skill-icon">⬡</div>
+        <h3>Game Development</h3>
+        <p>Interactive experiences from concept to ship. Level design, storytelling, gameplay mechanics, and audio integration.</p>
+        <div class="skill-tags">
+          <span>Unity</span><span>C#</span><span>Game Design</span><span>Level Design</span>
+        </div>
+      </div>
+      <div class="skill-block" data-delay="300">
+        <div class="skill-icon">✦</div>
+        <h3>AI & Creative Software</h3>
+        <p>AI-powered autonomous tools for marketing, audio, game design, and video. Natural language interfaces. Streamlit Creator.</p>
+        <div class="skill-tags">
+          <span>Python</span><span>Streamlit</span><span>GPT-4</span><span>Stable Diffusion</span>
+        </div>
+      </div>
+      <div class="skill-block" data-delay="400">
+        <div class="skill-icon">◉</div>
+        <h3>Visual Arts & Design</h3>
+        <p>Album covers, show flyers, websites, social media content, music videos, 3D assets, branding, and marketing materials.</p>
+        <div class="skill-tags">
+          <span>Graphic Design</span><span>3D Assets</span><span>Video Production</span><span>Branding</span>
+        </div>
+      </div>
+      <div class="skill-block" data-delay="500">
+        <div class="skill-icon">⟁</div>
+        <h3>Music Production</h3>
+        <p>Composition, arrangement, lyric writing, remixing. Studio &amp; live collaboration with hundreds of artists across genres.</p>
+        <div class="skill-tags">
+          <span>Composition</span><span>Mixing</span><span>Mastering</span><span>Artist Dev</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section class="section" id="projects">
+    <div class="section-label">03 · PROJECTS</div>
+    <h2 class="section-title">Selected Work</h2>
+    <div class="projects-list">
+
+      <div class="project-item" data-index="01">
+        <div class="project-meta">
+          <span class="project-num">01</span>
+          <div class="project-tags-inline">
+            <span>AI</span><span>Python</span><span>Streamlit</span>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3>brAInstormer 3.0</h3>
+          <p>All-in-one AI-powered creative suite. Generate full marketing plans, create images, videos, audio, and documents — everything in one interface. Self-taught and built from scratch in under two weeks.</p>
+          <div class="project-links">
+            <a href="https://github.com/rhythrosalabs" target="_blank">GitHub ↗</a>
+          </div>
+        </div>
+        <div class="project-bar"></div>
+      </div>
+
+      <div class="project-item" data-index="02">
+        <div class="project-meta">
+          <span class="project-num">02</span>
+          <div class="project-tags-inline">
+            <span>Unity</span><span>3D</span><span>Interactive</span>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3>Trinkets — Interactive Portfolio</h3>
+          <p>A virtual museum built in Unity. Explore my sound design, artwork, animations, and game work in a fully interactive 3D environment. Headphones recommended.</p>
+          <div class="project-links">
+            <a href="https://danielsheils.myportfolio.com" target="_blank">Explore ↗</a>
+          </div>
+        </div>
+        <div class="project-bar"></div>
+      </div>
+
+      <div class="project-item" data-index="03">
+        <div class="project-meta">
+          <span class="project-num">03</span>
+          <div class="project-tags-inline">
+            <span>AI</span><span>Streamlit</span><span>Game Dev</span>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3>Game Maker</h3>
+          <p>AI-accelerated game development platform. Generates concepts, assets, scripts, music, and 3D models. Supports DALL-E 3, Stable Diffusion, GPT-4, and CodeLlama.</p>
+          <div class="project-links">
+            <a href="https://github.com/rhythrosalabs" target="_blank">GitHub ↗</a>
+          </div>
+        </div>
+        <div class="project-bar"></div>
+      </div>
+
+      <div class="project-item" data-index="04">
+        <div class="project-meta">
+          <span class="project-num">04</span>
+          <div class="project-tags-inline">
+            <span>Unity</span><span>Sound Design</span><span>Game</span>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3>Prism Rider</h3>
+          <p>An experimental karting game centered on auditory exploration. AI-generated visual assets, dynamic sound design that responds to movement, and a cross-disciplinary audio-visual experience.</p>
+          <div class="project-links">
+            <a href="https://danielsheils.myportfolio.com" target="_blank">Play ↗</a>
+          </div>
+        </div>
+        <div class="project-bar"></div>
+      </div>
+
+      <div class="project-item" data-index="05">
+        <div class="project-meta">
+          <span class="project-num">05</span>
+          <div class="project-tags-inline">
+            <span>AR/XR</span><span>Sound Design</span><span>Enterprise</span>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3>AR/XR Sound Design — Rock Paper Reality</h3>
+          <p>Sound design for enterprise AR installations: The Glenlivet mixed reality tasting room, Play Like A Padre (San Diego Padres / Motorola / Lenovo at Petco Stadium), Red Bull Cliff Diving World Championship AR web app, Alzheimer's Association AR Promise Garden.</p>
+          <div class="project-links">
+            <a href="https://danielsheils.myportfolio.com" target="_blank">Details ↗</a>
+          </div>
+        </div>
+        <div class="project-bar"></div>
+      </div>
+
+      <div class="project-item" data-index="06">
+        <div class="project-meta">
+          <span class="project-num">06</span>
+          <div class="project-tags-inline">
+            <span>Music</span><span>AI Video</span>
+          </div>
+        </div>
+        <div class="project-content">
+          <h3>Sidestep Complex — "Mend"</h3>
+          <p>Original song and AI-generated video by Sidestep Complex — Daniel Sheils + Elizabeth Anaya Sheils. Genre-defying fusion of violin artistry, avant-garde composition, and innovative production.</p>
+          <div class="project-links">
+            <a href="https://danielsheils.myportfolio.com" target="_blank">Watch ↗</a>
+          </div>
+        </div>
+        <div class="project-bar"></div>
+      </div>
+
+    </div>
+    <div class="projects-more">
+      <a href="https://danielsheils.myportfolio.com" target="_blank" class="btn-ghost">Full Portfolio ↗</a>
+      <a href="https://github.com/rhythrosalabs" target="_blank" class="btn-ghost">GitHub ↗</a>
+    </div>
+  </section>
+
+  <!-- Experience -->
+  <section class="section section-dark" id="experience">
+    <div class="section-label">04 · EXPERIENCE</div>
+    <h2 class="section-title">Timeline</h2>
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">2008 – PRESENT</div>
+        <div class="timeline-body">
+          <h3>Freelance Creative</h3>
+          <div class="timeline-sub">Self-Employed · Hybrid</div>
+          <p>Audio engineering, sound design, music production, game development, graphic design, video production, artist development, and coding — serving clients across music, tech, media, and enterprise.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">APR 2025 – PRESENT</div>
+        <div class="timeline-body">
+          <h3>Streamlit Creator</h3>
+          <div class="timeline-sub">Streamlit · Remote</div>
+          <p>Official member of Streamlit's Creator program. Recognized for AI-powered tools including brAInstormer, GameMaker, Soundstorm, and a natural language Arduino command center.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">APR 2022 – PRESENT</div>
+        <div class="timeline-body">
+          <h3>Sound Designer</h3>
+          <div class="timeline-sub">Rock Paper Reality · Contract · Remote</div>
+          <p>AR/XR sound design for enterprise installations. Clients include The Glenlivet, San Diego Padres / Motorola / Lenovo, Red Bull, and the Alzheimer's Association.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">SEP 2023 – DEC 2024</div>
+        <div class="timeline-body">
+          <h3>Course Instructor</h3>
+          <div class="timeline-sub">The Westport Library · On-site</div>
+          <p>Taught all-age courses in introductory game design and generative AI / prompt engineering. Developed curriculum and course materials.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">MAR 2020 – JUL 2022</div>
+        <div class="timeline-body">
+          <h3>Lead Sound Technician</h3>
+          <div class="timeline-sub">Town of Greenwich, CT · On-site</div>
+          <p>Audio engineering for all town indoor and outdoor concerts, festivals, and parades. Managed a team of assistant engineers, maintained AV inventory, and submitted annual budgets.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">2014 – 2018</div>
+        <div class="timeline-body">
+          <h3>Radio Producer &amp; Content Creator</h3>
+          <div class="timeline-sub">WEMF Radio &amp; Impairment Science · Hybrid/Remote</div>
+          <p>Co-hosted and produced music radio shows. Produced podcasts, commercials, stingers, and show intros. Provided live audio engineering at Boston venues.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">2011 – 2014</div>
+        <div class="timeline-body">
+          <h3>Radio Producer</h3>
+          <div class="timeline-sub">UNregular Radio · Boston, MA · Hybrid</div>
+          <p>Co-hosted radio show, booked guest artists, produced custom stingers and audio logos, delivered podcast post-production and social media support.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="timeline-date">2008 – 2011</div>
+        <div class="timeline-body">
+          <h3>Audio Engineer</h3>
+          <div class="timeline-sub">East Longmeadow Community Access TV · On-site</div>
+          <p>Mixed and edited audio for local TV. Post-production, media management, and broadcast preparation.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section" id="contact">
+    <div class="section-label">05 · CONTACT</div>
+    <div class="contact-wrap">
+      <h2 class="section-title">Let's Make<br /><span class="accent">Something.</span></h2>
+      <p class="contact-sub">Open to collaborations, commissions, and conversations.</p>
+      <div class="contact-links">
+        <a href="https://danielsheils.myportfolio.com" target="_blank" class="contact-link">
+          <span class="contact-link-label">PORTFOLIO</span>
+          <span class="contact-link-val">danielsheils.myportfolio.com ↗</span>
+        </a>
+        <a href="https://github.com/rhythrosalabs" target="_blank" class="contact-link">
+          <span class="contact-link-label">GITHUB</span>
+          <span class="contact-link-val">github.com/rhythrosalabs ↗</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-logo">DS<span class="blink">_</span></span>
+      <span class="footer-copy">© 2026 Daniel Sheils · All rights reserved</span>
+      <span class="footer-built">Built with ♪ &amp; code</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
