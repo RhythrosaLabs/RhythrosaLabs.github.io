@@ -1,6 +1,6 @@
 # Daniel Sheils
 
-**Sound Designer · Music Producer · Game Developer · Visual Artist · Creative Technologist**
+**Sound Designer · Music Producer · Game Developer · Visual Artist · Writer · Lyricist · Rapper · Creative Technologist**
 
 Based in Missoula, MT · Open to remote collaborations worldwide
 
@@ -12,7 +12,7 @@ Based in Missoula, MT · Open to remote collaborations worldwide
 
 I'm Daniel Sheils — a multi-disciplinary creative whose work spans sound design, music production, game development, visual arts, interactive media, robotics, and AI-powered software. I've been doing this since 2008 and still find new territory to explore at every intersection of those fields.
 
-I founded and run **Noodlebake Records**, an independent multi-genre label and boutique shop out of Connecticut. As **Scatterboxx**, I've written and recorded nearly 30 solo albums. As a sound designer, I've built immersive AR/VR/XR soundscapes for enterprise clients including **Red Bull, Microsoft, Intel, Amazon, Motorola, Lenovo, San Diego Padres, The Glenlivet,** and the **Alzheimer's Association**. I'm an official **Streamlit Creator**, recognized for building autonomous AI tools for creative industries.
+I founded and run **Noodlebake Records**, an independent multi-genre label and boutique shop out of Connecticut. As **Scatterboxx**, I've written and recorded thousands of original songs across nearly 30 albums — as a rapper, lyricist, producer, and engineer. As a sound designer, I've built immersive AR/VR/XR soundscapes for enterprise clients including **Red Bull, Microsoft, Intel, Amazon, Motorola, Lenovo, San Diego Padres, The Glenlivet,** and the **Alzheimer's Association**. I'm an official **Streamlit Creator**, recognized for building autonomous AI tools for creative industries.
 
 My code-side work tends toward big-idea tools: all-in-one creative suites, AI agents with 190+ connectors, autonomous business platforms, record label management systems, browser-based DAWs, and multi-agent video pipelines. I taught myself to code to build things that didn't exist yet.
 
@@ -87,7 +87,7 @@ Full client list: Red Bull, Microsoft, Intel, Amazon, Motorola, Lenovo, San Dieg
 - **Course Instructor**, The Westport Library (2023–2024) — Game design and generative AI / prompt engineering
 - **Lead Sound Technician**, Town of Greenwich, CT (2020–2022) — Live sound at dozens of venues, concerts, festivals, and parades
 - Developed afterschool **music production curriculum** for middle school students in Massachusetts
-- Toured nationally as a performing musician multiple times
+- Toured nationally as a performing musician multiple times (Scatterboxx and Sidestep Complex)
 - Podcast editing and production; radio stingers for **WEMF, WMBR, WPKN, NPR** affiliates, and more
 - Hosted and produced radio shows on **WEMF Radio** (Cambridge, MA) and **UNregular Radio** (Boston, MA)
 - Sound design credits on multiple **indie games** beyond personal Unity projects
