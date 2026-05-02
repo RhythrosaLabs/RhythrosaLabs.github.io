@@ -152,3 +152,155 @@ window.addEventListener('scroll', () => {
   if (heroSub)   heroSub.style.transform   = `translateY(${scrollY * 0.1}px)`;
   if (heroBadges) heroBadges.style.transform = `translateY(${scrollY * 0.07}px)`;
 });
+
+/* ============================================================
+   SCROLL PROGRESS BAR
+   ============================================================ */
+const progressBar = document.getElementById('scroll-progress');
+window.addEventListener('scroll', () => {
+  const scrollTop  = window.scrollY;
+  const docHeight  = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  progressBar.style.width = pct + '%';
+}, { passive: true });
+
+/* ============================================================
+   CURSOR LABEL — contextual text on hover
+   ============================================================ */
+const cursorLabel = document.getElementById('cursor-label');
+
+document.addEventListener('mousemove', (e) => {
+  cursorLabel.style.left = e.clientX + 'px';
+  cursorLabel.style.top  = e.clientY + 'px';
+});
+
+function setCursorLabel(text) {
+  cursorLabel.textContent = text;
+  cursorLabel.classList.add('visible');
+}
+function clearCursorLabel() {
+  cursorLabel.classList.remove('visible');
+}
+
+document.querySelectorAll('.project-links a, .music-ext, .btn-ghost, .btn-primary').forEach(a => {
+  const t = a.textContent;
+  const label = t.includes('Bandcamp') ? 'LISTEN'
+              : t.includes('LinkedIn')  ? 'CONNECT'
+              : t.includes('GitHub')    ? 'CODE'
+              : t.includes('View') || t.includes('Work') ? 'EXPLORE'
+              : 'GO';
+  a.addEventListener('mouseenter', () => setCursorLabel(label));
+  a.addEventListener('mouseleave', clearCursorLabel);
+});
+
+document.querySelectorAll('.music-card').forEach(card => {
+  card.addEventListener('mouseenter', () => setCursorLabel('LISTEN'));
+  card.addEventListener('mouseleave', clearCursorLabel);
+});
+
+document.querySelectorAll('.contact-link').forEach(link => {
+  link.addEventListener('mouseenter', () => setCursorLabel('OPEN'));
+  link.addEventListener('mouseleave', clearCursorLabel);
+});
+
+/* ============================================================
+   3D TILT — music cards & stat cards
+   ============================================================ */
+function addTilt(selector, intensity) {
+  document.querySelectorAll(selector).forEach(el => {
+    el.addEventListener('mousemove', (e) => {
+      const rect = el.getBoundingClientRect();
+      const x = (e.clientX - rect.left)  / rect.width  - 0.5;
+      const y = (e.clientY - rect.top)   / rect.height - 0.5;
+      el.style.transition = 'transform 0.08s ease';
+      el.style.transform  = `perspective(700px) rotateY(${x * intensity}deg) rotateX(${-y * intensity}deg) translateZ(6px)`;
+    });
+    el.addEventListener('mouseleave', () => {
+      el.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s';
+      el.style.transform  = '';
+    });
+  });
+}
+
+addTilt('.music-card', 9);
+addTilt('.stat-card',  7);
+
+/* ============================================================
+   MAGNETIC BUTTONS
+   ============================================================ */
+document.querySelectorAll('.btn-primary, .btn-ghost').forEach(btn => {
+  btn.addEventListener('mousemove', (e) => {
+    const rect = btn.getBoundingClientRect();
+    const x = (e.clientX - rect.left - rect.width  / 2) * 0.28;
+    const y = (e.clientY - rect.top  - rect.height / 2) * 0.28;
+    btn.style.transform = `translate(${x}px, ${y}px)`;
+  });
+  btn.addEventListener('mouseleave', () => {
+    btn.style.transform = '';
+  });
+});
+
+/* ============================================================
+   ANIMATED STAT COUNTERS
+   ============================================================ */
+function animateCounter(el) {
+  const raw    = el.textContent.trim();
+  const num    = parseFloat(raw.replace(/[^0-9.]/g, ''));
+  const prefix = raw.match(/^[^0-9]*/)?.[0]  || '';
+  const suffix = raw.match(/[^0-9.]+$/)?.[0] || '';
+  if (isNaN(num) || num === 0) return;
+
+  const duration = 1400;
+  const startTs  = performance.now();
+
+  const tick = (now) => {
+    const elapsed  = now - startTs;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased    = 1 - Math.pow(1 - progress, 3);
+    el.textContent = prefix + Math.round(eased * num) + suffix;
+    if (progress < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      animateCounter(entry.target);
+      counterObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.6 });
+
+document.querySelectorAll('.stat-num').forEach(el => counterObserver.observe(el));
+
+/* ============================================================
+   CLICK RIPPLE
+   ============================================================ */
+document.addEventListener('click', (e) => {
+  const r = document.createElement('div');
+  r.className = 'click-ripple';
+  r.style.left = e.clientX + 'px';
+  r.style.top  = e.clientY + 'px';
+  document.body.appendChild(r);
+  r.addEventListener('animationend', () => r.remove());
+});
+
+/* ============================================================
+   SECTION TITLE CLIP-PATH REVEAL
+   ============================================================ */
+document.querySelectorAll('.section-title').forEach(el => {
+  el.style.clipPath  = 'inset(0 100% 0 0)';
+  el.style.transition = 'clip-path 1s cubic-bezier(0.16, 1, 0.3, 1)';
+});
+
+const titleRevealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.clipPath = 'inset(0 0% 0 0)';
+      titleRevealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.section-title').forEach(el => titleRevealObserver.observe(el));
