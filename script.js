@@ -1128,7 +1128,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     requestAnimationFrame(tickParticles);
   }
 
-  setTimeout(() => { resizeGame(); initPong(); initParticles(); tickParticles(); }, 420);
+  setTimeout(() => { resizeGame(); startTerminal(); initParticles(); tickParticles(); }, 420);
   window.addEventListener('resize', () => {
     resizeGame(); cancelGame(); initParticles();
     if (activeGame==='pong')      initPong();
