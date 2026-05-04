@@ -347,7 +347,7 @@ const labelScrambleObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.observe(el));
 
 /* ============================================================
-   HERO PANEL WIDGET — Pong / Projects / Terminal
+   HERO PANEL WIDGET — Games / Projects / Terminal
    ============================================================ */
 (function () {
   const panel = document.getElementById('heroPanel');
@@ -356,7 +356,6 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   const tabs = panel.querySelectorAll('.panel-tab');
   const apps = panel.querySelectorAll('.panel-app');
 
-  /* ── Tab switching ── */
   function switchTab(name) {
     tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
     apps.forEach(a => {
@@ -369,195 +368,344 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
 
   /* ============================================================
-     PONG — self-contained canvas game
-     Player paddle (bottom) tracks cursor X.  AI paddle (top) chases ball.
+     GAMES — Pong · Snake · Breakout
      ============================================================ */
   const pongApp = document.getElementById('appPong');
+  pongApp.innerHTML = `
+    <div class="game-picker">
+      <button class="game-btn active" data-game="pong">PONG</button>
+      <button class="game-btn" data-game="snake">SNAKE</button>
+      <button class="game-btn" data-game="breakout">BREAKOUT</button>
+    </div>`;
   const cv = document.createElement('canvas');
-  cv.style.cssText = 'display:block;width:100%;height:100%;';
+  cv.className = 'game-cv';
   pongApp.appendChild(cv);
   const pc = cv.getContext('2d');
 
-  const BALL_R   = 5;
-  const PAD_W    = 66;
-  const PAD_H    = 6;
-  const PAD_MARG = 16;
-  const BSPEED   = 3.8;
-  const AI_SPD   = 2.5;
-
-  let cw = 0, ch = 0;
-  let bx = 0, by = 0, bvx = 0, bvy = 0;
-  let playerX = 0, aiX = 0;
-  let pScore = 0, aScore = 0;
-  let pongMouseX = -1;
-
-  function resizePong() {
-    cw = pongApp.clientWidth;
-    ch = pongApp.clientHeight;
-    cv.width  = cw;
-    cv.height = ch;
-    if (!playerX) playerX = cw / 2;
-    if (!aiX)     aiX     = cw / 2;
-  }
-
-  function resetBall(toPlayer) {
-    bx  = cw / 2;
-    by  = ch / 2;
-    const a = (Math.random() * 0.45 + 0.28) * Math.PI;
-    bvx = Math.cos(a) * BSPEED * (Math.random() > 0.5 ? 1 : -1);
-    bvy = toPlayer ? Math.abs(Math.sin(a) * BSPEED) : -Math.abs(Math.sin(a) * BSPEED);
-  }
+  let cw = 0, ch = 0, activeGame = 'pong', gameRAF = null;
 
   function getAccent() {
     return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#c8f542';
   }
-
-  function drawPong() {
-    pc.clearRect(0, 0, cw, ch);
-    const ac = getAccent();
-
-    // Center dashed line
-    pc.save();
-    pc.setLineDash([4, 10]);
-    pc.strokeStyle = 'rgba(255,255,255,0.05)';
-    pc.lineWidth = 1;
-    pc.beginPath(); pc.moveTo(0, ch / 2); pc.lineTo(cw, ch / 2); pc.stroke();
-    pc.restore();
-
-    // AI paddle (dim, top)
-    pc.fillStyle = 'rgba(255,255,255,0.22)';
-    pc.fillRect(aiX - PAD_W / 2, PAD_MARG, PAD_W, PAD_H);
-
-    // Player paddle (accent glow, bottom)
-    pc.save();
-    pc.fillStyle = ac;
-    pc.shadowBlur = 10;
-    pc.shadowColor = ac;
-    pc.fillRect(playerX - PAD_W / 2, ch - PAD_MARG - PAD_H, PAD_W, PAD_H);
-    pc.restore();
-
-    // Ball
-    pc.save();
-    pc.beginPath();
-    pc.arc(bx, by, BALL_R, 0, Math.PI * 2);
-    pc.fillStyle = ac;
-    pc.shadowBlur = 14;
-    pc.shadowColor = ac;
-    pc.fill();
-    pc.restore();
-
-    // Scores
-    pc.font = "700 13px 'Space Mono', monospace";
-    pc.fillStyle = 'rgba(255,255,255,0.18)';
-    pc.textAlign = 'left';  pc.fillText(aScore, 12, 22);
-    pc.textAlign = 'right'; pc.fillText(pScore, cw - 12, ch - 10);
-
-    // Hint on first serve
-    if (pScore + aScore === 0) {
-      pc.font = "9px 'Space Mono', monospace";
-      pc.fillStyle = 'rgba(255,255,255,0.1)';
-      pc.textAlign = 'center';
-      pc.fillText('MOVE CURSOR TO PLAY', cw / 2, ch - 8);
-    }
+  function hexToRgb(hex) {
+    const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i);
+    return m ? `${parseInt(m[1],16)},${parseInt(m[2],16)},${parseInt(m[3],16)}` : '200,245,66';
+  }
+  function resizeGame() {
+    cw = pongApp.clientWidth;
+    ch = pongApp.clientHeight - 29;
+    cv.width  = cw;
+    cv.height = ch;
+  }
+  function cancelGame() {
+    if (gameRAF) { cancelAnimationFrame(gameRAF); gameRAF = null; }
   }
 
-  function tickPong() {
-    if (!cw || !ch) { requestAnimationFrame(tickPong); return; }
+  pongApp.querySelectorAll('.game-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      pongApp.querySelectorAll('.game-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      cancelGame();
+      activeGame = b.dataset.game;
+      resizeGame();
+      if (activeGame === 'pong')     initPong();
+      if (activeGame === 'snake')    initSnake();
+      if (activeGame === 'breakout') initBreakout();
+    });
+  });
 
-    // Player paddle smoothly follows cursor
+  /* ── PONG ── */
+  const BALL_R = 5, PAD_W = 66, PAD_H = 6, PAD_MARG = 16, BSPEED = 3.8, AI_SPD = 2.5;
+  let bx, by, bvx, bvy, playerX, aiX, pScore, aScore;
+  let pongMouseX = -1;
+
+  function initPong() {
+    playerX = aiX = cw / 2; pScore = aScore = 0;
+    resetBall(true);
+    gameRAF = requestAnimationFrame(tickPong);
+  }
+  function resetBall(toPlayer) {
+    bx = cw / 2; by = ch / 2;
+    const a = (Math.random() * 0.45 + 0.28) * Math.PI;
+    bvx = Math.cos(a) * BSPEED * (Math.random() > 0.5 ? 1 : -1);
+    bvy = toPlayer ? Math.abs(Math.sin(a) * BSPEED) : -Math.abs(Math.sin(a) * BSPEED);
+  }
+  function tickPong() {
+    if (activeGame !== 'pong') return;
+    const ac = getAccent();
     if (pongMouseX >= 0) playerX += (pongMouseX - playerX) * 0.14;
     playerX = Math.max(PAD_W / 2, Math.min(cw - PAD_W / 2, playerX));
-
-    // AI paddle chases ball with max speed
     const diff = bx - aiX;
     aiX += Math.sign(diff) * Math.min(Math.abs(diff) * 0.08, AI_SPD);
     aiX = Math.max(PAD_W / 2, Math.min(cw - PAD_W / 2, aiX));
-
-    bx += bvx;
-    by += bvy;
-
-    // Wall bounce
+    bx += bvx; by += bvy;
     if (bx < BALL_R)      { bx = BALL_R;      bvx =  Math.abs(bvx); }
     if (bx > cw - BALL_R) { bx = cw - BALL_R; bvx = -Math.abs(bvx); }
-
-    // Player paddle (bottom)
     const plY = ch - PAD_MARG - PAD_H;
     if (bvy > 0 && by + BALL_R >= plY && by - BALL_R <= plY + PAD_H &&
         bx >= playerX - PAD_W / 2 && bx <= playerX + PAD_W / 2) {
-      bvy = -Math.abs(bvy);
-      by  = plY - BALL_R;
-      const off = (bx - playerX) / (PAD_W / 2);
-      bvx += off * 1.8;
-      const s = Math.sqrt(bvx * bvx + bvy * bvy);
-      bvx = bvx / s * BSPEED; bvy = bvy / s * BSPEED;
+      bvy = -Math.abs(bvy); by = plY - BALL_R;
+      const off = (bx - playerX) / (PAD_W / 2); bvx += off * 1.8;
+      const s = Math.sqrt(bvx*bvx+bvy*bvy); bvx=bvx/s*BSPEED; bvy=bvy/s*BSPEED;
     }
-
-    // AI paddle (top)
     const aiPY = PAD_MARG;
     if (bvy < 0 && by - BALL_R <= aiPY + PAD_H && by + BALL_R >= aiPY &&
         bx >= aiX - PAD_W / 2 && bx <= aiX + PAD_W / 2) {
-      bvy = Math.abs(bvy);
-      by  = aiPY + PAD_H + BALL_R;
-      const off = (bx - aiX) / (PAD_W / 2);
-      bvx += off * 0.9;
-      const s = Math.sqrt(bvx * bvx + bvy * bvy);
-      bvx = bvx / s * BSPEED; bvy = bvy / s * BSPEED;
+      bvy = Math.abs(bvy); by = aiPY + PAD_H + BALL_R;
+      const off = (bx - aiX) / (PAD_W / 2); bvx += off * 0.9;
+      const s = Math.sqrt(bvx*bvx+bvy*bvy); bvx=bvx/s*BSPEED; bvy=bvy/s*BSPEED;
     }
-
-    // Score & reset
-    if (by + BALL_R < 0)  { pScore++; resetBall(true);  }
+    if (by + BALL_R < 0)  { pScore++; resetBall(true); }
     if (by - BALL_R > ch) { aScore++; resetBall(false); }
-
-    drawPong();
-    requestAnimationFrame(tickPong);
+    pc.clearRect(0, 0, cw, ch);
+    pc.save(); pc.setLineDash([4,10]); pc.strokeStyle='rgba(255,255,255,0.05)'; pc.lineWidth=1;
+    pc.beginPath(); pc.moveTo(0,ch/2); pc.lineTo(cw,ch/2); pc.stroke(); pc.restore();
+    pc.fillStyle='rgba(255,255,255,0.22)'; pc.fillRect(aiX-PAD_W/2,PAD_MARG,PAD_W,PAD_H);
+    pc.save(); pc.fillStyle=ac; pc.shadowBlur=10; pc.shadowColor=ac;
+    pc.fillRect(playerX-PAD_W/2,ch-PAD_MARG-PAD_H,PAD_W,PAD_H); pc.restore();
+    pc.save(); pc.beginPath(); pc.arc(bx,by,BALL_R,0,Math.PI*2);
+    pc.fillStyle=ac; pc.shadowBlur=14; pc.shadowColor=ac; pc.fill(); pc.restore();
+    pc.font="700 13px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.18)';
+    pc.textAlign='left';  pc.fillText(aScore,12,22);
+    pc.textAlign='right'; pc.fillText(pScore,cw-12,ch-10);
+    if (pScore+aScore===0) {
+      pc.font="9px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.1)';
+      pc.textAlign='center'; pc.fillText('MOVE CURSOR TO PLAY',cw/2,ch-8);
+    }
+    gameRAF = requestAnimationFrame(tickPong);
   }
 
-  panel.addEventListener('mousemove', e => {
-    const r = pongApp.getBoundingClientRect();
-    pongMouseX = e.clientX - r.left;
+  /* ── SNAKE ── */
+  const CELL = 16;
+  let snakeBody, snakeDir, snakeNext, snakeFood, snakeScore, snakeDead, snakeLastTime;
+  const SNAKE_MS = 130;
+
+  function initSnake() {
+    const cols = Math.floor(cw / CELL), rows = Math.floor(ch / CELL);
+    const mx = Math.floor(cols / 2), my = Math.floor(rows / 2);
+    snakeBody  = [{x:mx,y:my},{x:mx-1,y:my},{x:mx-2,y:my}];
+    snakeDir   = {x:1,y:0}; snakeNext = {x:1,y:0};
+    snakeScore = 0; snakeDead = false; snakeLastTime = 0;
+    placeFood(cols, rows);
+    gameRAF = requestAnimationFrame(tickSnake);
+  }
+  function placeFood(cols, rows) {
+    let pos;
+    do { pos = {x:Math.floor(Math.random()*cols), y:Math.floor(Math.random()*rows)}; }
+    while (snakeBody.some(s => s.x===pos.x && s.y===pos.y));
+    snakeFood = pos;
+  }
+  function tickSnake(ts) {
+    if (activeGame !== 'snake') return;
+    const ac = getAccent();
+    if (!snakeDead && ts - snakeLastTime >= SNAKE_MS) {
+      snakeLastTime = ts;
+      snakeDir = {...snakeNext};
+      const cols = Math.floor(cw/CELL), rows = Math.floor(ch/CELL);
+      const head = {x:snakeBody[0].x+snakeDir.x, y:snakeBody[0].y+snakeDir.y};
+      if (head.x<0||head.x>=cols||head.y<0||head.y>=rows||snakeBody.some(s=>s.x===head.x&&s.y===head.y)) {
+        snakeDead = true;
+      } else {
+        snakeBody.unshift(head);
+        if (head.x===snakeFood.x && head.y===snakeFood.y) { snakeScore++; placeFood(cols,rows); }
+        else snakeBody.pop();
+      }
+    }
+    pc.clearRect(0,0,cw,ch);
+    pc.fillStyle='rgba(255,255,255,0.025)';
+    for (let x=CELL;x<cw;x+=CELL) for (let y=CELL;y<ch;y+=CELL) pc.fillRect(x-0.5,y-0.5,1,1);
+    pc.save(); pc.fillStyle=ac; pc.shadowBlur=12; pc.shadowColor=ac;
+    pc.fillRect(snakeFood.x*CELL+3,snakeFood.y*CELL+3,CELL-6,CELL-6); pc.restore();
+    const rgb = hexToRgb(ac);
+    snakeBody.forEach((seg,i) => {
+      const t = 1 - i/snakeBody.length;
+      pc.fillStyle = i===0 ? ac : `rgba(${rgb},${0.2+t*0.55})`;
+      pc.fillRect(seg.x*CELL+1,seg.y*CELL+1,CELL-2,CELL-2);
+    });
+    pc.font="700 11px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.2)';
+    pc.textAlign='left'; pc.fillText(snakeScore,8,18);
+    if (snakeDead) {
+      pc.fillStyle='rgba(8,8,8,0.72)'; pc.fillRect(0,0,cw,ch);
+      pc.font="700 14px 'Space Mono',monospace"; pc.fillStyle=ac;
+      pc.textAlign='center'; pc.fillText('GAME OVER',cw/2,ch/2-12);
+      pc.font="10px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.3)';
+      pc.fillText('SCORE: '+snakeScore,cw/2,ch/2+8);
+      pc.fillText('CLICK TO RESTART',cw/2,ch/2+26);
+    } else if (snakeScore===0) {
+      pc.font="9px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.12)';
+      pc.textAlign='center'; pc.fillText('ARROWS / WASD',cw/2,ch-8);
+    }
+    gameRAF = requestAnimationFrame(tickSnake);
+  }
+  document.addEventListener('keydown', e => {
+    if (activeGame !== 'snake') return;
+    const map = {ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},
+                 a:{x:-1,y:0},d:{x:1,y:0},w:{x:0,y:-1},s:{x:0,y:1}};
+    const next = map[e.key];
+    if (next && !(next.x===-snakeDir.x && next.y===-snakeDir.y)) { snakeNext=next; e.preventDefault(); }
   });
-  panel.addEventListener('mouseleave', () => { pongMouseX = -1; });
+
+  /* ── BREAKOUT ── */
+  const BW=56, BH=5, BPAD_MARG=18, BB_R=5, BRK_SPEED=4.2;
+  const BRK_ROWS=5, BRK_COLS=8;
+  let brkBx,brkBy,brkBvx,brkBvy,brkPadX,brkBricks,brkScore,brkDead;
+  let brkMouseX = -1;
+
+  function initBreakout() {
+    brkPadX=cw/2; brkScore=0; brkDead=false;
+    brkBx=cw/2; brkBy=ch-55;
+    const a=-Math.PI/2+(Math.random()-0.5)*0.9;
+    brkBvx=Math.cos(a)*BRK_SPEED; brkBvy=Math.sin(a)*BRK_SPEED;
+    brkBricks=[];
+    const bW=(cw-14)/BRK_COLS, bHh=13;
+    for(let r=0;r<BRK_ROWS;r++) for(let c=0;c<BRK_COLS;c++)
+      brkBricks.push({x:7+c*(bW+2),y:20+r*(bHh+3),w:bW,h:bHh,alive:true,row:r});
+    gameRAF=requestAnimationFrame(tickBreakout);
+  }
+  function tickBreakout() {
+    if (activeGame !== 'breakout') return;
+    const ac = getAccent();
+    if (!brkDead) {
+      if (brkMouseX>=0) brkPadX+=(brkMouseX-brkPadX)*0.14;
+      brkPadX=Math.max(BW/2,Math.min(cw-BW/2,brkPadX));
+      brkBx+=brkBvx; brkBy+=brkBvy;
+      if(brkBx<BB_R)      {brkBx=BB_R;      brkBvx= Math.abs(brkBvx);}
+      if(brkBx>cw-BB_R)   {brkBx=cw-BB_R;   brkBvx=-Math.abs(brkBvx);}
+      if(brkBy<BB_R)      {brkBy=BB_R;       brkBvy= Math.abs(brkBvy);}
+      if(brkBy>ch+20)     {brkDead=true;}
+      const pY=ch-BPAD_MARG-BH;
+      if(brkBvy>0&&brkBy+BB_R>=pY&&brkBy-BB_R<=pY+BH&&
+         brkBx>=brkPadX-BW/2&&brkBx<=brkPadX+BW/2) {
+        brkBvy=-Math.abs(brkBvy); brkBy=pY-BB_R;
+        const off=(brkBx-brkPadX)/(BW/2); brkBvx+=off*1.5;
+        const s=Math.sqrt(brkBvx*brkBvx+brkBvy*brkBvy);
+        brkBvx=brkBvx/s*BRK_SPEED; brkBvy=brkBvy/s*BRK_SPEED;
+      }
+      let allGone=true;
+      for(const b of brkBricks) {
+        if(!b.alive) continue; allGone=false;
+        if(brkBx+BB_R>b.x&&brkBx-BB_R<b.x+b.w&&brkBy+BB_R>b.y&&brkBy-BB_R<b.y+b.h) {
+          b.alive=false; brkScore++;
+          const oL=brkBx+BB_R-b.x, oR=b.x+b.w-(brkBx-BB_R);
+          const oT=brkBy+BB_R-b.y, oB=b.y+b.h-(brkBy-BB_R);
+          if(Math.min(oL,oR)<Math.min(oT,oB)) brkBvx=-brkBvx; else brkBvy=-brkBvy;
+          break;
+        }
+      }
+      if(allGone) initBreakout();
+    }
+    pc.clearRect(0,0,cw,ch);
+    brkBricks.forEach(b=>{
+      if(!b.alive) return;
+      const t=1-b.row/BRK_ROWS;
+      pc.save(); pc.globalAlpha=0.15+t*0.5; pc.fillStyle=ac; pc.fillRect(b.x,b.y,b.w,b.h);
+      pc.globalAlpha=0.3+t*0.4; pc.strokeStyle=ac; pc.lineWidth=0.5; pc.strokeRect(b.x,b.y,b.w,b.h);
+      pc.restore();
+    });
+    pc.save(); pc.fillStyle=ac; pc.shadowBlur=8; pc.shadowColor=ac;
+    pc.fillRect(brkPadX-BW/2,ch-BPAD_MARG-BH,BW,BH); pc.restore();
+    pc.save(); pc.beginPath(); pc.arc(brkBx,brkBy,BB_R,0,Math.PI*2);
+    pc.fillStyle=ac; pc.shadowBlur=12; pc.shadowColor=ac; pc.fill(); pc.restore();
+    pc.font="700 11px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.2)';
+    pc.textAlign='left'; pc.fillText(brkScore,8,14);
+    if(brkDead) {
+      pc.fillStyle='rgba(8,8,8,0.75)'; pc.fillRect(0,0,cw,ch);
+      pc.font="700 14px 'Space Mono',monospace"; pc.fillStyle=ac;
+      pc.textAlign='center'; pc.fillText('GAME OVER',cw/2,ch/2-12);
+      pc.font="10px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.3)';
+      pc.fillText('SCORE: '+brkScore,cw/2,ch/2+8);
+      pc.fillText('CLICK TO RESTART',cw/2,ch/2+26);
+    } else if(brkScore===0) {
+      pc.font="9px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.12)';
+      pc.textAlign='center'; pc.fillText('MOVE CURSOR TO PLAY',cw/2,ch-5);
+    }
+    gameRAF=requestAnimationFrame(tickBreakout);
+  }
+
+  /* ── Click to restart dead games ── */
+  cv.addEventListener('click', () => {
+    if (activeGame==='snake'    && snakeDead) initSnake();
+    if (activeGame==='breakout' && brkDead)   initBreakout();
+  });
+
+  /* ── Shared cursor tracking ── */
+  panel.addEventListener('mousemove', e => {
+    const r = cv.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    pongMouseX = activeGame==='pong'     ? x : -1;
+    brkMouseX  = activeGame==='breakout' ? x : -1;
+  });
+  panel.addEventListener('mouseleave', () => { pongMouseX=-1; brkMouseX=-1; });
 
   /* ============================================================
-     PROJECTS CAROUSEL
+     PROJECTS CAROUSEL — with thumbnails + direct links
      ============================================================ */
   const projApp = document.getElementById('appProjects');
   const FEATURED = [
-    { num: '01', title: 'Ottomate',           tags: ['TypeScript', 'AI Agent'],     desc: 'Universal AI agent workbench. Goal → plan → code → deliver. 190+ connectors, 200+ skills.',      href: 'https://github.com/RhythrosaLabs/otto-mate-2' },
-    { num: '03', title: 'Trinkets',            tags: ['Unity', '3D', 'Interactive'], desc: 'A virtual museum. Explore sound design, art & animations as a fully interactive 3D environment.', href: 'https://github.com/RhythrosaLabs' },
-    { num: '06', title: 'AR/XR Sound Design',  tags: ['AR/XR', 'Enterprise'],        desc: 'Red Bull · Microsoft · Intel · Amazon · Motorola · Lenovo · San Diego Padres · The Glenlivet',  href: 'https://www.linkedin.com/in/danielsheils' },
-    { num: '08', title: 'Soundstorm',          tags: ['Python', 'Audio', 'AI'],      desc: 'AI-driven audio platform for sound designers, composers, and experimental audio artists.',       href: 'https://github.com/RhythrosaLabs/soundstorm' },
-    { num: '14', title: 'Streamlit Creator',   tags: ['Python', 'Streamlit'],        desc: 'Official Streamlit Creator — autonomous AI tools for music, game design, and video production.', href: 'https://github.com/RhythrosaLabs/streamlit-components-demo' },
+    {
+      title: 'Ottomate', tags: ['TypeScript','AI Agent','Automation'],
+      desc: 'Universal AI agent workbench. Goal → plan → code → deliver. 190+ connectors, 200+ skills.',
+      href: 'https://github.com/RhythrosaLabs/otto-mate-2',
+      img:  'https://opengraph.githubassets.com/1/RhythrosaLabs/otto-mate-2'
+    },
+    {
+      title: 'brAInstormer', tags: ['AI','Python','Streamlit'],
+      desc: 'All-in-one AI creative suite. Generate images, video, audio & full marketing plans.',
+      href: 'https://github.com/RhythrosaLabs',
+      img:  'https://opengraph.githubassets.com/1/RhythrosaLabs/brainstormer'
+    },
+    {
+      title: 'Trinkets', tags: ['Unity','3D','Interactive'],
+      desc: 'A virtual museum. Explore original sound design, art & animations in 3D. Mac only.',
+      href: 'https://noodlebake.itch.io/trinkets',
+      img:  'https://img.itch.zone/aW1nLzEyNjc5MjMzLnBuZw==/original/3X6xj5.png'
+    },
+    {
+      title: 'Mend — Music Video', tags: ['Music Video','AI Animation','2022'],
+      desc: 'Directed & produced by Daniel Sheils. Music by Sidestep Complex. Early AI animation experiment.',
+      href: 'https://www.youtube.com/watch?v=1-IJfLo25s4',
+      img:  'https://img.youtube.com/vi/1-IJfLo25s4/mqdefault.jpg'
+    },
+    {
+      title: 'Streamlit Components', tags: ['Python','Streamlit','AI Tools'],
+      desc: 'Official Streamlit Creator — autonomous tools for music, game design, and video production.',
+      href: 'https://github.com/RhythrosaLabs/streamlit-components-demo',
+      img:  'https://opengraph.githubassets.com/1/RhythrosaLabs/streamlit-components-demo'
+    },
   ];
-  let projIdx = 0, projInterval = null, projStarted = false;
+  let projIdx=0, projInterval=null, projStarted=false;
 
   function showProject() {
     const slide = projApp.querySelector('.proj-slide');
     if (!slide) return;
     const p = FEATURED[projIdx];
     slide.style.opacity = '0';
-    slide.style.transform = 'translateY(10px)';
+    slide.style.transform = 'translateY(8px)';
     setTimeout(() => {
       slide.innerHTML = `
-        <div class="proj-num">${p.num}</div>
-        <h3 class="proj-title">${p.title}</h3>
-        <p class="proj-desc">${p.desc}</p>
-        <div class="proj-tags">${p.tags.map(t => `<span>${t}</span>`).join('')}</div>
-        <a href="${p.href}" target="_blank" class="proj-link">View Project ↗</a>`;
+        <div class="proj-thumb">
+          <img src="${p.img}" alt="${p.title}" onerror="this.style.display='none'">
+        </div>
+        <div class="proj-body">
+          <h3 class="proj-title">${p.title}</h3>
+          <p class="proj-desc">${p.desc}</p>
+          <div class="proj-tags">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>
+          <a href="${p.href}" target="_blank" class="proj-link">View Project ↗</a>
+        </div>`;
       slide.style.opacity = '1';
       slide.style.transform = 'translateY(0)';
-      projApp.querySelectorAll('.proj-dot').forEach((d, i) => d.classList.toggle('active', i === projIdx));
-    }, 200);
+      projApp.querySelectorAll('.proj-dot').forEach((d,i)=>d.classList.toggle('active',i===projIdx));
+    }, 180);
   }
 
   function startProjects() {
     projStarted = true;
     projApp.innerHTML = '<div class="proj-slide"></div><div class="proj-dots"></div>';
-    FEATURED.forEach((_, i) => {
+    FEATURED.forEach((_,i) => {
       const d = document.createElement('button');
-      d.className = 'proj-dot' + (i === 0 ? ' active' : '');
+      d.className = 'proj-dot'+(i===0?' active':'');
       d.addEventListener('click', () => {
-        projIdx = i; showProject();
+        projIdx=i; showProject();
         clearInterval(projInterval);
         projInterval = setInterval(nextProj, 4500);
       });
@@ -566,8 +714,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     showProject();
     projInterval = setInterval(nextProj, 4500);
   }
-
-  function nextProj() { projIdx = (projIdx + 1) % FEATURED.length; showProject(); }
+  function nextProj() { projIdx=(projIdx+1)%FEATURED.length; showProject(); }
 
   /* ============================================================
      TERMINAL TYPEWRITER
@@ -575,61 +722,59 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   const termApp = document.getElementById('appTerminal');
   let termStarted = false;
   const TLINES = [
-    { t: 'cmd', s: 'whoami' },
-    { t: 'out', s: 'daniel_sheils' },
-    { t: 'cmd', s: 'cat skills.txt' },
-    { t: 'out', s: 'Sound Design · AI/ML · Game Dev' },
-    { t: 'out', s: 'AR/VR/XR · Streamlit · Unity · Python' },
-    { t: 'out', s: 'Music · Mixing · Visual Arts · Robotics' },
-    { t: 'cmd', s: 'ls projects/' },
-    { t: 'out', s: 'ottomate/  brainstormer/  trinkets/' },
-    { t: 'out', s: 'soundstorm/  duogpt/  game-maker/' },
-    { t: 'out', s: 'mend-mv/  the-raven-mv/  +7 more...' },
-    { t: 'cmd', s: 'cat clients.txt' },
-    { t: 'out', s: 'Red Bull · Microsoft · Intel' },
-    { t: 'out', s: 'Amazon · Motorola · Lenovo' },
-    { t: 'out', s: 'San Diego Padres · The Glenlivet' },
-    { t: 'cmd', s: 'echo $EXPERIENCE' },
-    { t: 'out', s: '18+ years creative practice' },
-    { t: 'cmd', s: 'echo $ALBUMS' },
-    { t: 'out', s: '~30 solo & collab albums' },
-    { t: 'cmd', s: 'ping creativity.io' },
-    { t: 'out', s: 'PONG: reply from creativity.io ✓' },
+    { t:'cmd', s:'whoami' },
+    { t:'out', s:'daniel_sheils' },
+    { t:'cmd', s:'cat skills.txt' },
+    { t:'out', s:'Sound Design · AI/ML · Game Dev' },
+    { t:'out', s:'AR/VR/XR · Streamlit · Unity · Python' },
+    { t:'out', s:'Music · Mixing · Visual Arts · Robotics' },
+    { t:'cmd', s:'ls projects/' },
+    { t:'out', s:'ottomate/  brainstormer/  trinkets/' },
+    { t:'out', s:'soundstorm/  duogpt/  game-maker/' },
+    { t:'out', s:'mend-mv/  the-raven-mv/  +7 more...' },
+    { t:'cmd', s:'cat clients.txt' },
+    { t:'out', s:'Red Bull · Microsoft · Intel' },
+    { t:'out', s:'Amazon · Motorola · Lenovo' },
+    { t:'out', s:'San Diego Padres · The Glenlivet' },
+    { t:'cmd', s:'echo $EXPERIENCE' },
+    { t:'out', s:'18+ years creative practice' },
+    { t:'cmd', s:'echo $ALBUMS' },
+    { t:'out', s:'~30 solo & collab albums' },
+    { t:'cmd', s:'ping creativity.io' },
+    { t:'out', s:'reply from creativity.io: time=0ms ✓' },
   ];
-
   function startTerminal() {
     termStarted = true;
     termApp.innerHTML = '<div class="term-body" id="termBody"></div>';
     runTerm(document.getElementById('termBody'), 0);
   }
-
   function runTerm(body, i) {
-    if (i >= TLINES.length) {
-      setTimeout(() => { body.innerHTML = ''; runTerm(body, 0); }, 2500);
-      return;
-    }
+    if (i >= TLINES.length) { setTimeout(()=>{ body.innerHTML=''; runTerm(body,0); },2500); return; }
     const line = TLINES[i];
     const div = document.createElement('div');
-    div.className = 'term-line term-' + line.t;
+    div.className = 'term-line term-'+line.t;
     body.appendChild(div);
-    if (line.t === 'cmd') {
-      div.textContent = '$ ';
-      let j = 0;
-      const iv = setInterval(() => {
-        div.textContent = '$ ' + line.s.slice(0, ++j);
-        body.scrollTop = body.scrollHeight;
-        if (j >= line.s.length) { clearInterval(iv); setTimeout(() => runTerm(body, i + 1), 350); }
-      }, 52);
+    if (line.t==='cmd') {
+      div.textContent='$ '; let j=0;
+      const iv=setInterval(()=>{
+        div.textContent='$ '+line.s.slice(0,++j);
+        body.scrollTop=body.scrollHeight;
+        if(j>=line.s.length){clearInterval(iv);setTimeout(()=>runTerm(body,i+1),350);}
+      },52);
     } else {
-      div.textContent = line.s;
-      body.scrollTop = body.scrollHeight;
-      setTimeout(() => runTerm(body, i + 1), 100);
+      div.textContent=line.s;
+      body.scrollTop=body.scrollHeight;
+      setTimeout(()=>runTerm(body,i+1),100);
     }
   }
 
   /* ── Init ── */
-  resizePong();
-  setTimeout(() => { resizePong(); resetBall(true); requestAnimationFrame(tickPong); }, 400);
-  window.addEventListener('resize', resizePong);
+  setTimeout(() => { resizeGame(); initPong(); }, 420);
+  window.addEventListener('resize', () => {
+    resizeGame(); cancelGame();
+    if (activeGame==='pong')     initPong();
+    if (activeGame==='snake')    initSnake();
+    if (activeGame==='breakout') initBreakout();
+  });
 }());
 /* ==== PANEL END ==== */
