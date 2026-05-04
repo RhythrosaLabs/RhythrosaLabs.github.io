@@ -1128,6 +1128,29 @@ footer {
 }
 
 /* ============================================================
+   ==== PONG START ====
+   ============================================================ */
+#pong-ball {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  pointer-events: none;
+  opacity: 0.22;
+  box-shadow: 0 0 8px rgba(200,245,66,0.9), 0 0 22px rgba(200,245,66,0.4), 0 0 44px rgba(200,245,66,0.12);
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  will-change: left, top;
+  transition: opacity 0.3s, box-shadow 0.3s;
+}
+#pong-ball.pong-hot {
+  opacity: 0.65;
+  box-shadow: 0 0 12px rgba(200,245,66,1), 0 0 32px rgba(200,245,66,0.6), 0 0 60px rgba(200,245,66,0.25);
+}
+/* ==== PONG END ==== */
+
+/* ============================================================
    RESPONSIVE
    ============================================================ */
 @media (max-width: 900px) {

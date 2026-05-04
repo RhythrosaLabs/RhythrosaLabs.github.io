@@ -336,3 +336,86 @@ const labelScrambleObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.5 });
 
 document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.observe(el));
+
+/* ============================================================
+   ==== PONG START ====
+   Ambient pong ball bouncing inside the hero.
+   Your cursor acts as a paddle — hover near it to deflect.
+   Remove this block + the #pong-ball CSS block to undo fully.
+   ============================================================ */
+(function () {
+  const hero = document.querySelector('.hero');
+  if (!hero) return;
+
+  const ball = document.createElement('div');
+  ball.id = 'pong-ball';
+  hero.appendChild(ball);
+
+  const SIZE   = 4;   // ball radius for wall collision
+  const SPEED  = 1.6;
+  const PADDLE = 55;  // cursor deflection radius
+
+  let x, y, vx, vy;
+  let cursorX = -9999, cursorY = -9999;
+
+  function init() {
+    const w = hero.offsetWidth;
+    const h = hero.offsetHeight;
+    x = w * 0.35;
+    y = h * 0.55;
+    const angle = (Math.random() * Math.PI * 0.5) + 0.4;
+    vx = Math.cos(angle) * SPEED * (Math.random() > 0.5 ? 1 : -1);
+    vy = Math.sin(angle) * SPEED * (Math.random() > 0.5 ? 1 : -1);
+  }
+
+  init();
+  window.addEventListener('resize', init);
+
+  hero.addEventListener('mousemove', (e) => {
+    const r = hero.getBoundingClientRect();
+    cursorX = e.clientX - r.left;
+    cursorY = e.clientY - r.top;
+  });
+  hero.addEventListener('mouseleave', () => { cursorX = -9999; cursorY = -9999; });
+
+  function tick() {
+    const w = hero.offsetWidth;
+    const h = hero.offsetHeight;
+
+    x += vx;
+    y += vy;
+
+    // Wall bounces
+    if (x <= SIZE)     { vx =  Math.abs(vx); x = SIZE; }
+    if (x >= w - SIZE) { vx = -Math.abs(vx); x = w - SIZE; }
+    if (y <= SIZE)     { vy =  Math.abs(vy); y = SIZE; }
+    if (y >= h - SIZE) { vy = -Math.abs(vy); y = h - SIZE; }
+
+    // Cursor paddle deflection
+    const dx   = x - cursorX;
+    const dy   = y - cursorY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < PADDLE && dist > 0) {
+      ball.classList.add('pong-hot');
+      const nx  = dx / dist;
+      const ny  = dy / dist;
+      const dot = vx * nx + vy * ny;
+      if (dot < 0) {
+        vx -= 2 * dot * nx;
+        vy -= 2 * dot * ny;
+        x = cursorX + nx * (PADDLE + 1);
+        y = cursorY + ny * (PADDLE + 1);
+      }
+    } else {
+      ball.classList.remove('pong-hot');
+    }
+
+    ball.style.left = x + 'px';
+    ball.style.top  = y + 'px';
+    requestAnimationFrame(tick);
+  }
+
+  tick();
+}());
+/* ==== PONG END ==== */
