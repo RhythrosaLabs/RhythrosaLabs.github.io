@@ -1027,6 +1027,7 @@ footer {
    ============================================================ */
 .skill-icon {
   display: block;
+  width: fit-content;
   transform-origin: center center;
 }
 .skill-block:hover {
