@@ -2,7 +2,6 @@
    CUSTOM CURSOR
    ============================================================ */
 const cursor = document.getElementById('cursor');
-const trail = document.getElementById('cursorTrail');
 
 let mouseX = 0, mouseY = 0;
 
@@ -11,18 +10,10 @@ document.addEventListener('mousemove', (e) => {
   mouseY = e.clientY;
   cursor.style.left = mouseX + 'px';
   cursor.style.top  = mouseY + 'px';
-  trail.style.left  = mouseX + 'px';
-  trail.style.top   = mouseY + 'px';
 });
 
 document.addEventListener('mousedown', () => cursor.style.transform = 'translate(-50%,-50%) scale(1.8)');
 document.addEventListener('mouseup',   () => cursor.style.transform = 'translate(-50%,-50%) scale(1)');
-
-// Grow cursor on hover over links/buttons
-document.querySelectorAll('a, button, .project-item, .stat-card, .skill-block').forEach(el => {
-  el.addEventListener('mouseenter', () => trail.style.transform = 'translate(-50%,-50%) scale(1.6)');
-  el.addEventListener('mouseleave', () => trail.style.transform = 'translate(-50%,-50%) scale(1)');
-});
 
 /* ============================================================
    SCROLL ANIMATIONS (IntersectionObserver)

@@ -88,17 +88,7 @@ strong {
   mix-blend-mode: difference;
 }
 
-.cursor-trail {
-  position: fixed;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid rgba(200,245,66,0.4);
-  pointer-events: none;
-  z-index: 9998;
-  transform: translate(-50%, -50%);
-  transition: left 0.12s ease, top 0.12s ease;
-}
+
 
 /* ============================================================
    NAV
