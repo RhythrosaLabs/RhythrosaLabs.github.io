@@ -304,3 +304,35 @@ const titleRevealObserver = new IntersectionObserver((entries) => {
 }, { threshold: 0.15 });
 
 document.querySelectorAll('.section-title').forEach(el => titleRevealObserver.observe(el));
+
+/* ============================================================
+   SECTION LABEL SCRAMBLE ON SCROLL-IN
+   ============================================================ */
+const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789·';
+
+const labelScrambleObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const original = el.textContent;
+      let iter = 0;
+      const interval = setInterval(() => {
+        el.textContent = original
+          .split('')
+          .map((char, i) => {
+            if (i < iter || char === ' ') return original[i];
+            return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+          })
+          .join('');
+        iter += 0.5;
+        if (iter >= original.length) {
+          clearInterval(interval);
+          el.textContent = original;
+        }
+      }, 25);
+      labelScrambleObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.observe(el));
