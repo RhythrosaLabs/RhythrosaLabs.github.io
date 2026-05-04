@@ -1026,7 +1026,8 @@ footer {
    SKILL BLOCK — glow, icon pop, tag highlight
    ============================================================ */
 .skill-icon {
-  display: inline-block;
+  display: block;
+  transform-origin: center center;
 }
 .skill-block:hover {
   box-shadow: inset 0 0 0 1px rgba(200,245,66,0.18), 0 0 28px rgba(200,245,66,0.04);
