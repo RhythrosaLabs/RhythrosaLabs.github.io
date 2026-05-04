@@ -953,10 +953,34 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       href: 'https://www.youtube.com/watch?v=1-IJfLo25s4'
     },
     {
-      icon: '⟁', iconLabel: 'STREAMLIT',
-      title: 'Streamlit Components', tags: ['Python','Streamlit','AI Tools'],
-      desc: 'Official Streamlit Creator — autonomous tools for music, game design, and video production.',
+      icon: '▲', iconLabel: 'STREAMLIT CREATOR',
+      title: 'Streamlit Creator', tags: ['Python','Streamlit','AI Tools'],
+      desc: 'Official Streamlit Creator — autonomous AI tools for music generation, game design, and video production.',
       href: 'https://github.com/RhythrosaLabs/streamlit-components-demo'
+    },
+    {
+      icon: '◎', iconLabel: 'RECORD LABEL',
+      title: 'Noodlebake Records', tags: ['Music','Label','Indie'],
+      desc: 'Independent record label founded by Daniel Sheils. Releases spanning electronic, ambient, and experimental.',
+      href: 'https://noodlebake.itch.io'
+    },
+    {
+      icon: '⬖', iconLabel: 'AI · CHAT',
+      title: 'DuoGPT', tags: ['AI','Python','Chat'],
+      desc: 'Two AI models debate, riff, and collaborate in real time. Emergent creativity from machine dialogue.',
+      href: 'https://github.com/RhythrosaLabs'
+    },
+    {
+      icon: '◭', iconLabel: 'GAME · AR',
+      title: 'Prism Rider', tags: ['Unity','AR','Game'],
+      desc: 'Augmented reality rhythm game. Ride light beams, dodge obstacles, and sync to original audio.',
+      href: 'https://noodlebake.itch.io'
+    },
+    {
+      icon: '⊞', iconLabel: 'MUSIC · VIDEO',
+      title: 'The Raven — Music Video', tags: ['Music Video','Directed','2023'],
+      desc: 'Director, editor & composer. Visual narrative built entirely from generative and found footage.',
+      href: 'https://www.youtube.com/@danielsheils'
     },
   ];
   let projIdx=0, projInterval=null, projStarted=false;
