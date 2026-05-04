@@ -346,12 +346,27 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   const RADIUS      = 5;
   const SPEED       = 0.85;
   const PADDLE_R    = 52;
-  const CURSOR_LERP = 0.09; // lower = smoother cursor tracking
+  const CURSOR_LERP = 0.09;
+  const SUBSTEPS    = 3;     // mini-steps per frame → smoother arc, less clipping
 
   let x = 0, y = 0, vx = 0, vy = 0;
   let rawCursorX = -9999, rawCursorY = -9999;
   let cursorX    = -9999, cursorY    = -9999;
   let collidables = [];
+
+  function nudgeAngle() {
+    // Rotate velocity by ±6° so ball never locks into a repetitive path
+    const a = (Math.random() - 0.5) * 0.21;
+    const cos = Math.cos(a), sin = Math.sin(a);
+    const nx = vx * cos - vy * sin;
+    const ny = vx * sin + vy * cos;
+    vx = nx; vy = ny;
+  }
+
+  function normalizeSpeed() {
+    const spd = Math.sqrt(vx * vx + vy * vy);
+    if (spd > 0) { vx = (vx / spd) * SPEED; vy = (vy / spd) * SPEED; }
+  }
 
   // Use Range API to get per-character bounding rects without touching the DOM
   function charRects(el, heroRect) {
@@ -440,13 +455,17 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     const rr = rect.right  + pad;
     const rt = rect.top    - pad;
     const rb = rect.bottom + pad;
-    if (x < rl || x > rr || y < rt || y > rb) return;
+    if (x < rl || x > rr || y < rt || y > rb) return false;
     const dL = x - rl, dR = rr - x, dT = y - rt, dB = rb - y;
     const min = Math.min(dL, dR, dT, dB);
     if      (min === dL && vx > 0) { vx = -Math.abs(vx); x = rl - 1; }
     else if (min === dR && vx < 0) { vx =  Math.abs(vx); x = rr + 1; }
     else if (min === dT && vy > 0) { vy = -Math.abs(vy); y = rt - 1; }
     else if (min === dB && vy < 0) { vy =  Math.abs(vy); y = rb + 1; }
+    else return false;
+    normalizeSpeed();
+    nudgeAngle();
+    return true;
   }
 
   function tick() {
@@ -455,7 +474,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     const w = hero.clientWidth;
     const h = hero.clientHeight;
 
-    // Lerp cursor so fast mouse jerks don't teleport the paddle
+    // Lerp cursor smoothly
     if (rawCursorX < 0) {
       cursorX = -9999; cursorY = -9999;
     } else {
@@ -463,17 +482,25 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       cursorY += (rawCursorY - cursorY) * CURSOR_LERP;
     }
 
-    x += vx;
-    y += vy;
+    // Sub-step: move in SUBSTEPS mini-increments per frame
+    const sx = vx / SUBSTEPS;
+    const sy = vy / SUBSTEPS;
 
-    // Hard wall clamp — strictly inside hero
-    if (x < RADIUS)     { vx =  Math.abs(vx); x = RADIUS; }
-    if (x > w - RADIUS) { vx = -Math.abs(vx); x = w - RADIUS; }
-    if (y < RADIUS)     { vy =  Math.abs(vy); y = RADIUS; }
-    if (y > h - RADIUS) { vy = -Math.abs(vy); y = h - RADIUS; }
+    for (let s = 0; s < SUBSTEPS; s++) {
+      x += sx;
+      y += sy;
 
-    // Per-character / element surface collisions
-    for (const r of collidables) resolveRect(r);
+      // Hard wall clamp
+      if (x < RADIUS)     { vx =  Math.abs(vx); x = RADIUS;     normalizeSpeed(); nudgeAngle(); }
+      if (x > w - RADIUS) { vx = -Math.abs(vx); x = w - RADIUS; normalizeSpeed(); nudgeAngle(); }
+      if (y < RADIUS)     { vy =  Math.abs(vy); y = RADIUS;     normalizeSpeed(); nudgeAngle(); }
+      if (y > h - RADIUS) { vy = -Math.abs(vy); y = h - RADIUS; normalizeSpeed(); nudgeAngle(); }
+
+      // Resolve at most ONE rect collision per substep to prevent double-reversals
+      for (const r of collidables) {
+        if (resolveRect(r)) break;
+      }
+    }
 
     // Cursor paddle
     const dx   = x - cursorX;
@@ -489,6 +516,8 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
         vy -= 2 * dot * ny;
         x = cursorX + nx * (PADDLE_R + 2);
         y = cursorY + ny * (PADDLE_R + 2);
+        normalizeSpeed();
+        nudgeAngle();
       }
     } else {
       ball.classList.remove('pong-hot');
