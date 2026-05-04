@@ -1297,17 +1297,18 @@ footer {
 
 .game-btn {
   font-family: var(--mono);
-  font-size: 0.54rem;
-  letter-spacing: 0.12em;
+  font-size: 0.45rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--muted);
   background: none;
   border: none;
   border-right: 1px solid var(--border);
-  padding: 0.5rem 0.8rem;
+  padding: 0.5rem 0.3rem;
   cursor: none;
   transition: color 0.18s;
   white-space: nowrap;
+  flex: 1;
   position: relative;
 }
 
