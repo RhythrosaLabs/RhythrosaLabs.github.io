@@ -1163,8 +1163,36 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     requestAnimationFrame(tickParticles);
   }
 
-  startTerminal();
-  setTimeout(() => { resizeGame(); initParticles(); tickParticles(); }, 420);
+  // Randomise the starting tab + game on every page load
+  (function randomInit() {
+    const GAMES = ['pong','snake','breakout','tetris','asteroids','flappy'];
+    // 8 total slots: 6 games + projects + terminal
+    const pick  = Math.floor(Math.random() * (GAMES.length + 2));
+    if (pick < GAMES.length) {
+      // PLAY tab with a random game
+      activeGame = GAMES[pick];
+      pongApp.querySelectorAll('.game-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.game === activeGame);
+      });
+      setTimeout(() => {
+        resizeGame(); initParticles(); tickParticles();
+        switchTab('pong');
+      }, 420);
+    } else if (pick === GAMES.length) {
+      // PROJECTS tab
+      setTimeout(() => {
+        resizeGame(); initParticles(); tickParticles();
+        switchTab('projects');
+      }, 420);
+    } else {
+      // TERMINAL tab
+      startTerminal();
+      setTimeout(() => {
+        resizeGame(); initParticles(); tickParticles();
+        switchTab('terminal');
+      }, 420);
+    }
+  }());
   window.addEventListener('resize', () => {
     resizeGame(); cancelGame(); initParticles();
     if (activeGame==='pong')      initPong();
