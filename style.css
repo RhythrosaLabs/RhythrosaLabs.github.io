@@ -13,12 +13,80 @@
   --surface:  #111111;
   --border:   #1e1e1e;
   --accent:   #c8f542;
-  --accent2:  #7fff6e;
+  --accent2:  #a8e832;
   --text:     #e8e8e8;
   --muted:    #555;
   --mono:     'Space Mono', monospace;
   --sans:     'Space Grotesk', sans-serif;
 }
+
+[data-theme="plasma"] {
+  --accent:  #00e5ff;
+  --accent2: #40f0ff;
+}
+[data-theme="ember"] {
+  --accent:  #ff6b35;
+  --accent2: #ff8f5e;
+}
+[data-theme="violet"] {
+  --accent:  #b06bff;
+  --accent2: #c98fff;
+}
+[data-theme="rose"] {
+  --accent:  #ff2d78;
+  --accent2: #ff6699;
+}
+
+/* ============================================================
+   THEME SWITCHER
+   ============================================================ */
+.theme-switcher {
+  position: fixed;
+  top: 1.15rem;
+  left: 1.4rem;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: rgba(8,8,8,0.72);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 0.45rem 0.75rem;
+}
+
+.theme-switcher-label {
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  color: var(--muted);
+  margin-right: 0.2rem;
+  text-transform: uppercase;
+}
+
+.theme-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--dot);
+  border: 1.5px solid transparent;
+  padding: 0;
+  cursor: none;
+  opacity: 0.4;
+  transition: opacity 0.2s, transform 0.2s, border-color 0.2s;
+}
+
+.theme-dot:hover {
+  opacity: 0.9;
+  transform: scale(1.35);
+}
+
+.theme-dot.active {
+  opacity: 1;
+  border-color: rgba(255,255,255,0.45);
+  transform: scale(1.2);
+}
+
 
 html {
   scroll-behavior: smooth;

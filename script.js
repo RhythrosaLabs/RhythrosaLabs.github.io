@@ -16,6 +16,24 @@ document.addEventListener('mousedown', () => cursor.style.transform = 'translate
 document.addEventListener('mouseup',   () => cursor.style.transform = 'translate(-50%,-50%) scale(1)');
 
 /* ============================================================
+   THEME SWITCHER
+   ============================================================ */
+(function () {
+  const root   = document.documentElement;
+  const dots   = document.querySelectorAll('.theme-dot');
+  const saved  = localStorage.getItem('ds-theme') || 'default';
+
+  function applyTheme(theme) {
+    root.setAttribute('data-theme', theme === 'default' ? '' : theme);
+    dots.forEach(d => d.classList.toggle('active', d.dataset.theme === theme));
+    localStorage.setItem('ds-theme', theme);
+  }
+
+  applyTheme(saved);
+  dots.forEach(d => d.addEventListener('click', () => applyTheme(d.dataset.theme)));
+}());
+
+/* ============================================================
    SCROLL ANIMATIONS (IntersectionObserver)
    ============================================================ */
 const observerConfig = { threshold: 0.15 };
@@ -343,15 +361,28 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   ball.id = 'pong-ball';
   hero.appendChild(ball);
 
-  const RADIUS      = 5;
-  const SPEED       = 0.85;
-  const PADDLE_R    = 52;
-  const CURSOR_LERP = 0.09;
-  const SUBSTEPS    = 3;     // mini-steps per frame → smoother arc, less clipping
+  const RADIUS   = 5;
+  const SPEED    = 0.85;
+  const PADDLE_R = 30;   // tighter paddle — ball must actually be close
+  const SUBSTEPS = 3;
+
+  // Trail canvas
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;';
+  hero.insertBefore(canvas, ball);
+  const ctx = canvas.getContext('2d');
+  const TRAIL_LEN = 22;
+  const trail = [];
+
+  function resizeCanvas() {
+    canvas.width  = hero.clientWidth;
+    canvas.height = hero.clientHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
 
   let x = 0, y = 0, vx = 0, vy = 0;
-  let rawCursorX = -9999, rawCursorY = -9999;
-  let cursorX    = -9999, cursorY    = -9999;
+  let cursorX = -9999, cursorY = -9999;
   let collidables = [];
 
   function nudgeAngle() {
@@ -441,13 +472,10 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
 
   hero.addEventListener('mousemove', (e) => {
     const r = hero.getBoundingClientRect();
-    rawCursorX = e.clientX - r.left;
-    rawCursorY = e.clientY - r.top;
+    cursorX = e.clientX - r.left;
+    cursorY = e.clientY - r.top;
   });
-  hero.addEventListener('mouseleave', () => {
-    rawCursorX = -9999; rawCursorY = -9999;
-    cursorX    = -9999; cursorY    = -9999;
-  });
+  hero.addEventListener('mouseleave', () => { cursorX = -9999; cursorY = -9999; });
 
   function resolveRect(rect) {
     const pad = RADIUS + 2;
@@ -474,15 +502,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     const w = hero.clientWidth;
     const h = hero.clientHeight;
 
-    // Lerp cursor smoothly
-    if (rawCursorX < 0) {
-      cursorX = -9999; cursorY = -9999;
-    } else {
-      cursorX += (rawCursorX - cursorX) * CURSOR_LERP;
-      cursorY += (rawCursorY - cursorY) * CURSOR_LERP;
-    }
-
-    // Sub-step: move in SUBSTEPS mini-increments per frame
+    // Sub-step movement
     const sx = vx / SUBSTEPS;
     const sy = vy / SUBSTEPS;
 
@@ -490,19 +510,17 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       x += sx;
       y += sy;
 
-      // Hard wall clamp
       if (x < RADIUS)     { vx =  Math.abs(vx); x = RADIUS;     normalizeSpeed(); nudgeAngle(); }
       if (x > w - RADIUS) { vx = -Math.abs(vx); x = w - RADIUS; normalizeSpeed(); nudgeAngle(); }
       if (y < RADIUS)     { vy =  Math.abs(vy); y = RADIUS;     normalizeSpeed(); nudgeAngle(); }
       if (y > h - RADIUS) { vy = -Math.abs(vy); y = h - RADIUS; normalizeSpeed(); nudgeAngle(); }
 
-      // Resolve at most ONE rect collision per substep to prevent double-reversals
       for (const r of collidables) {
         if (resolveRect(r)) break;
       }
     }
 
-    // Cursor paddle
+    // Raw cursor paddle — no lerp, tight radius
     const dx   = x - cursorX;
     const dy   = y - cursorY;
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -522,6 +540,22 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     } else {
       ball.classList.remove('pong-hot');
     }
+
+    // Trail: record position, draw fading dots on canvas using current accent color
+    trail.push({ x, y });
+    if (trail.length > TRAIL_LEN) trail.shift();
+
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#c8f542';
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    trail.forEach((pt, i) => {
+      const t = (i + 1) / trail.length;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, RADIUS * t * 0.8, 0, Math.PI * 2);
+      ctx.fillStyle = accentColor;
+      ctx.globalAlpha = t * 0.18;
+      ctx.fill();
+    });
+    ctx.globalAlpha = 1;
 
     ball.style.left = x + 'px';
     ball.style.top  = y + 'px';
