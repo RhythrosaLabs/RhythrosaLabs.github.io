@@ -340,7 +340,8 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
 /* ============================================================
    ==== PONG START ====
    Ambient pong ball bouncing inside the hero.
-   Bounces off all hero text/element surfaces + cursor paddle.
+   Per-character collision via Range API (no DOM changes).
+   Smoothed cursor paddle to remove jitter.
    Remove this block + the #pong-ball CSS block to undo fully.
    ============================================================ */
 (function () {
@@ -351,54 +352,99 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   ball.id = 'pong-ball';
   hero.appendChild(ball);
 
-  const RADIUS   = 5;
-  const SPEED    = 0.85;
-  const PADDLE_R = 52;
+  const RADIUS      = 5;
+  const SPEED       = 0.85;
+  const PADDLE_R    = 52;
+  const CURSOR_LERP = 0.09; // lower = smoother cursor tracking
 
   let x = 0, y = 0, vx = 0, vy = 0;
-  let cursorX = -9999, cursorY = -9999;
+  let rawCursorX = -9999, rawCursorY = -9999;
+  let cursorX    = -9999, cursorY    = -9999;
   let collidables = [];
+
+  // Use Range API to get per-character bounding rects without touching the DOM
+  function charRects(el, heroRect) {
+    const rects = [];
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      const len = node.textContent.length;
+      for (let i = 0; i < len; i++) {
+        if (!node.textContent[i].trim()) continue;
+        const range = document.createRange();
+        range.setStart(node, i);
+        range.setEnd(node, i + 1);
+        const r = range.getBoundingClientRect();
+        if (r.width > 1 && r.height > 1) {
+          rects.push({
+            left:   r.left   - heroRect.left,
+            top:    r.top    - heroRect.top,
+            right:  r.right  - heroRect.left,
+            bottom: r.bottom - heroRect.top,
+          });
+        }
+      }
+    }
+    return rects;
+  }
 
   function buildCollidables() {
     const heroRect = hero.getBoundingClientRect();
-    collidables = Array.from(
-      hero.querySelectorAll('.hero-tag, .hero-title, .hero-sub, .hero-badges, .hero-cta, .hero-scroll-indicator')
-    ).map(el => {
+    collidables = [];
+
+    // Per-letter collision on the big title
+    hero.querySelectorAll('.hero-title .line').forEach(el => {
+      collidables.push(...charRects(el, heroRect));
+    });
+
+    // Per-letter on the hero tag line
+    hero.querySelectorAll('.hero-tag').forEach(el => {
+      collidables.push(...charRects(el, heroRect));
+    });
+
+    // Element-level for subtitle, badges, buttons (good enough at small size)
+    hero.querySelectorAll(
+      '.hero-sub, .hero-badges .badge, .hero-cta a, .hero-scroll-indicator'
+    ).forEach(el => {
       const r = el.getBoundingClientRect();
-      return {
+      const rect = {
         left:   r.left   - heroRect.left,
         top:    r.top    - heroRect.top,
         right:  r.right  - heroRect.left,
         bottom: r.bottom - heroRect.top,
       };
-    }).filter(r => r.right - r.left > 4 && r.bottom - r.top > 4);
+      if (rect.right - rect.left > 2 && rect.bottom - rect.top > 2) {
+        collidables.push(rect);
+      }
+    });
   }
 
   function init() {
     const w = hero.clientWidth;
     const h = hero.clientHeight;
-    // Start in the right-side open area away from text
-    x = w * 0.78;
-    y = h * 0.22;
+    x  = w * 0.78;
+    y  = h * 0.22;
     const angle = Math.PI * 0.65 + (Math.random() - 0.5) * 0.6;
     vx = Math.cos(angle) * SPEED;
     vy = Math.sin(angle) * SPEED;
     buildCollidables();
   }
 
-  // Delay init until hero elements have rendered
-  setTimeout(init, 400);
-  window.addEventListener('resize', init);
+  setTimeout(init, 450);
+  window.addEventListener('resize', () => setTimeout(() => { init(); }, 250));
 
   hero.addEventListener('mousemove', (e) => {
     const r = hero.getBoundingClientRect();
-    cursorX = e.clientX - r.left;
-    cursorY = e.clientY - r.top;
+    rawCursorX = e.clientX - r.left;
+    rawCursorY = e.clientY - r.top;
   });
-  hero.addEventListener('mouseleave', () => { cursorX = -9999; cursorY = -9999; });
+  hero.addEventListener('mouseleave', () => {
+    rawCursorX = -9999; rawCursorY = -9999;
+    cursorX    = -9999; cursorY    = -9999;
+  });
 
   function resolveRect(rect) {
-    const pad = RADIUS + 3;
+    const pad = RADIUS + 2;
     const rl = rect.left   - pad;
     const rr = rect.right  + pad;
     const rt = rect.top    - pad;
@@ -418,16 +464,24 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     const w = hero.clientWidth;
     const h = hero.clientHeight;
 
+    // Lerp cursor so fast mouse jerks don't teleport the paddle
+    if (rawCursorX < 0) {
+      cursorX = -9999; cursorY = -9999;
+    } else {
+      cursorX += (rawCursorX - cursorX) * CURSOR_LERP;
+      cursorY += (rawCursorY - cursorY) * CURSOR_LERP;
+    }
+
     x += vx;
     y += vy;
 
     // Hard wall clamp — strictly inside hero
-    if (x < RADIUS)      { vx =  Math.abs(vx); x = RADIUS; }
-    if (x > w - RADIUS)  { vx = -Math.abs(vx); x = w - RADIUS; }
-    if (y < RADIUS)      { vy =  Math.abs(vy); y = RADIUS; }
-    if (y > h - RADIUS)  { vy = -Math.abs(vy); y = h - RADIUS; }
+    if (x < RADIUS)     { vx =  Math.abs(vx); x = RADIUS; }
+    if (x > w - RADIUS) { vx = -Math.abs(vx); x = w - RADIUS; }
+    if (y < RADIUS)     { vy =  Math.abs(vy); y = RADIUS; }
+    if (y > h - RADIUS) { vy = -Math.abs(vy); y = h - RADIUS; }
 
-    // Element surface collisions
+    // Per-character / element surface collisions
     for (const r of collidables) resolveRect(r);
 
     // Cursor paddle
