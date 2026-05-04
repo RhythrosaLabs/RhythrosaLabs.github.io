@@ -363,7 +363,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
 
   const RADIUS   = 5;
   const SPEED    = 0.85;
-  const PADDLE_R = 30;   // tighter paddle — ball must actually be close
+  const PADDLE_R = 45;   // wider radius, direction-gated so no false triggers
   const SUBSTEPS = 3;
 
   // Trail canvas
@@ -383,6 +383,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
 
   let x = 0, y = 0, vx = 0, vy = 0;
   let cursorX = -9999, cursorY = -9999;
+  let cursorVX = 0, cursorVY = 0;  // cursor velocity for momentum imprint
   let collidables = [];
 
   function nudgeAngle() {
@@ -471,11 +472,15 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   window.addEventListener('resize', () => setTimeout(() => { init(); }, 250));
 
   hero.addEventListener('mousemove', (e) => {
-    const r = hero.getBoundingClientRect();
-    cursorX = e.clientX - r.left;
-    cursorY = e.clientY - r.top;
+    const r  = hero.getBoundingClientRect();
+    const nx = e.clientX - r.left;
+    const ny = e.clientY - r.top;
+    cursorVX = cursorX > -999 ? nx - cursorX : 0;
+    cursorVY = cursorY > -999 ? ny - cursorY : 0;
+    cursorX  = nx;
+    cursorY  = ny;
   });
-  hero.addEventListener('mouseleave', () => { cursorX = -9999; cursorY = -9999; });
+  hero.addEventListener('mouseleave', () => { cursorX = -9999; cursorY = -9999; cursorVX = 0; cursorVY = 0; });
 
   function resolveRect(rect) {
     const pad = RADIUS + 2;
@@ -520,7 +525,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       }
     }
 
-    // Raw cursor paddle — no lerp, tight radius
+    // Cursor paddle: wider radius, direction-gated, cursor velocity imprint
     const dx   = x - cursorX;
     const dy   = y - cursorY;
     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -529,12 +534,22 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       const nx  = dx / dist;
       const ny  = dy / dist;
       const dot = vx * nx + vy * ny;
-      if (dot < 0) {
+      // Fire if ball moves toward cursor OR cursor sweeps toward ball (>2px/frame threshold)
+      const cursorApproach = cursorVX * (-nx) + cursorVY * (-ny);
+      if (dot < 0 || cursorApproach > 2) {
         vx -= 2 * dot * nx;
         vy -= 2 * dot * ny;
+        // Imprint cursor momentum — lets a fast swipe launch the ball
+        const K = 0.06;
+        vx += cursorVX * K;
+        vy += cursorVY * K;
         x = cursorX + nx * (PADDLE_R + 2);
         y = cursorY + ny * (PADDLE_R + 2);
-        normalizeSpeed();
+        // Clamp: cursor can boost up to 2× base speed but not below it
+        const spd = Math.sqrt(vx * vx + vy * vy);
+        const cap = SPEED * 2.0;
+        if (spd > cap)  { vx = (vx / spd) * cap;   vy = (vy / spd) * cap; }
+        if (spd < SPEED){ vx = (vx / spd) * SPEED; vy = (vy / spd) * SPEED; }
         nudgeAngle();
       }
     } else {
