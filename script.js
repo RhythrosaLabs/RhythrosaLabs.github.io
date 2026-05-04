@@ -356,13 +356,24 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   const tabs = panel.querySelectorAll('.panel-tab');
   const apps = panel.querySelectorAll('.panel-app');
 
+  function launchActiveGame() {
+    cancelGame(); resizeGame();
+    if (activeGame==='pong')      initPong();
+    else if (activeGame==='snake')     initSnake();
+    else if (activeGame==='breakout')  initBreakout();
+    else if (activeGame==='tetris')    initTetris();
+    else if (activeGame==='asteroids') initAsteroids();
+    else if (activeGame==='flappy')    initFlappy();
+  }
   function switchTab(name) {
     tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
     apps.forEach(a => {
       const on = a.dataset.app === name;
       a.classList.toggle('active', on);
-      if (on && name === 'terminal' && !termStarted) startTerminal();
-      if (on && name === 'projects' && !projStarted) startProjects();
+      if (on && name === 'pong')                        launchActiveGame();
+      if (!on && a.dataset.app === 'pong')              cancelGame();
+      if (on && name === 'terminal' && !termStarted)    startTerminal();
+      if (on && name === 'projects' && !projStarted)    startProjects();
     });
   }
   tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
@@ -632,7 +643,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   }
 
   /* ── TETRIS — standard arrow controls ── */
-  const TET_COLS = 16;
+  const TET_COLS = 22;
   const PIECES = [
     [[1,1,1,1]],
     [[1,1],[1,1]],
@@ -1152,7 +1163,8 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     requestAnimationFrame(tickParticles);
   }
 
-  setTimeout(() => { resizeGame(); startTerminal(); initParticles(); tickParticles(); }, 420);
+  startTerminal();
+  setTimeout(() => { resizeGame(); initParticles(); tickParticles(); }, 420);
   window.addEventListener('resize', () => {
     resizeGame(); cancelGame(); initParticles();
     if (activeGame==='pong')      initPong();
