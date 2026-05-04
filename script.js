@@ -347,236 +347,289 @@ const labelScrambleObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.observe(el));
 
 /* ============================================================
-   ==== PONG START ====
-   Ambient pong ball bouncing inside the hero.
-   Per-character collision via Range API (no DOM changes).
-   Smoothed cursor paddle to remove jitter.
-   Remove this block + the #pong-ball CSS block to undo fully.
+   HERO PANEL WIDGET — Pong / Projects / Terminal
    ============================================================ */
 (function () {
-  const hero = document.querySelector('.hero');
-  if (!hero) return;
+  const panel = document.getElementById('heroPanel');
+  if (!panel) return;
 
-  const ball = document.createElement('div');
-  ball.id = 'pong-ball';
-  hero.appendChild(ball);
+  const tabs = panel.querySelectorAll('.panel-tab');
+  const apps = panel.querySelectorAll('.panel-app');
 
-  const RADIUS   = 5;
-  const SPEED    = 0.85;
-  const PADDLE_R = 45;   // wider radius, direction-gated so no false triggers
-  const SUBSTEPS = 3;
-
-  // Trail canvas
-  const canvas = document.createElement('canvas');
-  canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;';
-  hero.insertBefore(canvas, ball);
-  const ctx = canvas.getContext('2d');
-  const TRAIL_LEN = 22;
-  const trail = [];
-
-  function resizeCanvas() {
-    canvas.width  = hero.clientWidth;
-    canvas.height = hero.clientHeight;
+  /* ── Tab switching ── */
+  function switchTab(name) {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    apps.forEach(a => {
+      const on = a.dataset.app === name;
+      a.classList.toggle('active', on);
+      if (on && name === 'terminal' && !termStarted) startTerminal();
+      if (on && name === 'projects' && !projStarted) startProjects();
+    });
   }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+  tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
 
-  let x = 0, y = 0, vx = 0, vy = 0;
-  let cursorX = -9999, cursorY = -9999;
-  let cursorVX = 0, cursorVY = 0;  // cursor velocity for momentum imprint
-  let collidables = [];
+  /* ============================================================
+     PONG — self-contained canvas game
+     Player paddle (bottom) tracks cursor X.  AI paddle (top) chases ball.
+     ============================================================ */
+  const pongApp = document.getElementById('appPong');
+  const cv = document.createElement('canvas');
+  cv.style.cssText = 'display:block;width:100%;height:100%;';
+  pongApp.appendChild(cv);
+  const pc = cv.getContext('2d');
 
-  function nudgeAngle() {
-    // Rotate velocity by ±6° so ball never locks into a repetitive path
-    const a = (Math.random() - 0.5) * 0.21;
-    const cos = Math.cos(a), sin = Math.sin(a);
-    const nx = vx * cos - vy * sin;
-    const ny = vx * sin + vy * cos;
-    vx = nx; vy = ny;
+  const BALL_R   = 5;
+  const PAD_W    = 66;
+  const PAD_H    = 6;
+  const PAD_MARG = 16;
+  const BSPEED   = 3.8;
+  const AI_SPD   = 2.5;
+
+  let cw = 0, ch = 0;
+  let bx = 0, by = 0, bvx = 0, bvy = 0;
+  let playerX = 0, aiX = 0;
+  let pScore = 0, aScore = 0;
+  let pongMouseX = -1;
+
+  function resizePong() {
+    cw = pongApp.clientWidth;
+    ch = pongApp.clientHeight;
+    cv.width  = cw;
+    cv.height = ch;
+    if (!playerX) playerX = cw / 2;
+    if (!aiX)     aiX     = cw / 2;
   }
 
-  function normalizeSpeed() {
-    const spd = Math.sqrt(vx * vx + vy * vy);
-    if (spd > 0) { vx = (vx / spd) * SPEED; vy = (vy / spd) * SPEED; }
+  function resetBall(toPlayer) {
+    bx  = cw / 2;
+    by  = ch / 2;
+    const a = (Math.random() * 0.45 + 0.28) * Math.PI;
+    bvx = Math.cos(a) * BSPEED * (Math.random() > 0.5 ? 1 : -1);
+    bvy = toPlayer ? Math.abs(Math.sin(a) * BSPEED) : -Math.abs(Math.sin(a) * BSPEED);
   }
 
-  // Use Range API to get per-character bounding rects without touching the DOM
-  function charRects(el, heroRect) {
-    const rects = [];
-    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-    let node;
-    while ((node = walker.nextNode())) {
-      const len = node.textContent.length;
-      for (let i = 0; i < len; i++) {
-        if (!node.textContent[i].trim()) continue;
-        const range = document.createRange();
-        range.setStart(node, i);
-        range.setEnd(node, i + 1);
-        const r = range.getBoundingClientRect();
-        if (r.width > 1 && r.height > 1) {
-          rects.push({
-            left:   r.left   - heroRect.left,
-            top:    r.top    - heroRect.top,
-            right:  r.right  - heroRect.left,
-            bottom: r.bottom - heroRect.top,
-          });
-        }
-      }
+  function getAccent() {
+    return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#c8f542';
+  }
+
+  function drawPong() {
+    pc.clearRect(0, 0, cw, ch);
+    const ac = getAccent();
+
+    // Center dashed line
+    pc.save();
+    pc.setLineDash([4, 10]);
+    pc.strokeStyle = 'rgba(255,255,255,0.05)';
+    pc.lineWidth = 1;
+    pc.beginPath(); pc.moveTo(0, ch / 2); pc.lineTo(cw, ch / 2); pc.stroke();
+    pc.restore();
+
+    // AI paddle (dim, top)
+    pc.fillStyle = 'rgba(255,255,255,0.22)';
+    pc.fillRect(aiX - PAD_W / 2, PAD_MARG, PAD_W, PAD_H);
+
+    // Player paddle (accent glow, bottom)
+    pc.save();
+    pc.fillStyle = ac;
+    pc.shadowBlur = 10;
+    pc.shadowColor = ac;
+    pc.fillRect(playerX - PAD_W / 2, ch - PAD_MARG - PAD_H, PAD_W, PAD_H);
+    pc.restore();
+
+    // Ball
+    pc.save();
+    pc.beginPath();
+    pc.arc(bx, by, BALL_R, 0, Math.PI * 2);
+    pc.fillStyle = ac;
+    pc.shadowBlur = 14;
+    pc.shadowColor = ac;
+    pc.fill();
+    pc.restore();
+
+    // Scores
+    pc.font = "700 13px 'Space Mono', monospace";
+    pc.fillStyle = 'rgba(255,255,255,0.18)';
+    pc.textAlign = 'left';  pc.fillText(aScore, 12, 22);
+    pc.textAlign = 'right'; pc.fillText(pScore, cw - 12, ch - 10);
+
+    // Hint on first serve
+    if (pScore + aScore === 0) {
+      pc.font = "9px 'Space Mono', monospace";
+      pc.fillStyle = 'rgba(255,255,255,0.1)';
+      pc.textAlign = 'center';
+      pc.fillText('MOVE CURSOR TO PLAY', cw / 2, ch - 8);
     }
-    return rects;
   }
 
-  function buildCollidables() {
-    const heroRect = hero.getBoundingClientRect();
-    collidables = [];
+  function tickPong() {
+    if (!cw || !ch) { requestAnimationFrame(tickPong); return; }
 
-    // Per-letter collision on the big title
-    hero.querySelectorAll('.hero-title .line').forEach(el => {
-      collidables.push(...charRects(el, heroRect));
-    });
+    // Player paddle smoothly follows cursor
+    if (pongMouseX >= 0) playerX += (pongMouseX - playerX) * 0.14;
+    playerX = Math.max(PAD_W / 2, Math.min(cw - PAD_W / 2, playerX));
 
-    // Per-letter on the hero tag line
-    hero.querySelectorAll('.hero-tag').forEach(el => {
-      collidables.push(...charRects(el, heroRect));
-    });
+    // AI paddle chases ball with max speed
+    const diff = bx - aiX;
+    aiX += Math.sign(diff) * Math.min(Math.abs(diff) * 0.08, AI_SPD);
+    aiX = Math.max(PAD_W / 2, Math.min(cw - PAD_W / 2, aiX));
 
-    // Element-level for subtitle, badges, buttons (good enough at small size)
-    hero.querySelectorAll(
-      '.hero-sub, .hero-badges .badge, .hero-cta a, .hero-scroll-indicator'
-    ).forEach(el => {
-      const r = el.getBoundingClientRect();
-      const rect = {
-        left:   r.left   - heroRect.left,
-        top:    r.top    - heroRect.top,
-        right:  r.right  - heroRect.left,
-        bottom: r.bottom - heroRect.top,
-      };
-      if (rect.right - rect.left > 2 && rect.bottom - rect.top > 2) {
-        collidables.push(rect);
-      }
-    });
+    bx += bvx;
+    by += bvy;
+
+    // Wall bounce
+    if (bx < BALL_R)      { bx = BALL_R;      bvx =  Math.abs(bvx); }
+    if (bx > cw - BALL_R) { bx = cw - BALL_R; bvx = -Math.abs(bvx); }
+
+    // Player paddle (bottom)
+    const plY = ch - PAD_MARG - PAD_H;
+    if (bvy > 0 && by + BALL_R >= plY && by - BALL_R <= plY + PAD_H &&
+        bx >= playerX - PAD_W / 2 && bx <= playerX + PAD_W / 2) {
+      bvy = -Math.abs(bvy);
+      by  = plY - BALL_R;
+      const off = (bx - playerX) / (PAD_W / 2);
+      bvx += off * 1.8;
+      const s = Math.sqrt(bvx * bvx + bvy * bvy);
+      bvx = bvx / s * BSPEED; bvy = bvy / s * BSPEED;
+    }
+
+    // AI paddle (top)
+    const aiPY = PAD_MARG;
+    if (bvy < 0 && by - BALL_R <= aiPY + PAD_H && by + BALL_R >= aiPY &&
+        bx >= aiX - PAD_W / 2 && bx <= aiX + PAD_W / 2) {
+      bvy = Math.abs(bvy);
+      by  = aiPY + PAD_H + BALL_R;
+      const off = (bx - aiX) / (PAD_W / 2);
+      bvx += off * 0.9;
+      const s = Math.sqrt(bvx * bvx + bvy * bvy);
+      bvx = bvx / s * BSPEED; bvy = bvy / s * BSPEED;
+    }
+
+    // Score & reset
+    if (by + BALL_R < 0)  { pScore++; resetBall(true);  }
+    if (by - BALL_R > ch) { aScore++; resetBall(false); }
+
+    drawPong();
+    requestAnimationFrame(tickPong);
   }
 
-  function init() {
-    const w = hero.clientWidth;
-    const h = hero.clientHeight;
-    x  = w * 0.78;
-    y  = h * 0.22;
-    const angle = Math.PI * 0.65 + (Math.random() - 0.5) * 0.6;
-    vx = Math.cos(angle) * SPEED;
-    vy = Math.sin(angle) * SPEED;
-    buildCollidables();
-  }
-
-  setTimeout(init, 450);
-  window.addEventListener('resize', () => setTimeout(() => { init(); }, 250));
-
-  hero.addEventListener('mousemove', (e) => {
-    const r  = hero.getBoundingClientRect();
-    const nx = e.clientX - r.left;
-    const ny = e.clientY - r.top;
-    cursorVX = cursorX > -999 ? nx - cursorX : 0;
-    cursorVY = cursorY > -999 ? ny - cursorY : 0;
-    cursorX  = nx;
-    cursorY  = ny;
+  panel.addEventListener('mousemove', e => {
+    const r = pongApp.getBoundingClientRect();
+    pongMouseX = e.clientX - r.left;
   });
-  hero.addEventListener('mouseleave', () => { cursorX = -9999; cursorY = -9999; cursorVX = 0; cursorVY = 0; });
+  panel.addEventListener('mouseleave', () => { pongMouseX = -1; });
 
-  function resolveRect(rect) {
-    const pad = RADIUS + 2;
-    const rl = rect.left   - pad;
-    const rr = rect.right  + pad;
-    const rt = rect.top    - pad;
-    const rb = rect.bottom + pad;
-    if (x < rl || x > rr || y < rt || y > rb) return false;
-    const dL = x - rl, dR = rr - x, dT = y - rt, dB = rb - y;
-    const min = Math.min(dL, dR, dT, dB);
-    if      (min === dL && vx > 0) { vx = -Math.abs(vx); x = rl - 1; }
-    else if (min === dR && vx < 0) { vx =  Math.abs(vx); x = rr + 1; }
-    else if (min === dT && vy > 0) { vy = -Math.abs(vy); y = rt - 1; }
-    else if (min === dB && vy < 0) { vy =  Math.abs(vy); y = rb + 1; }
-    else return false;
-    normalizeSpeed();
-    nudgeAngle();
-    return true;
+  /* ============================================================
+     PROJECTS CAROUSEL
+     ============================================================ */
+  const projApp = document.getElementById('appProjects');
+  const FEATURED = [
+    { num: '01', title: 'Ottomate',           tags: ['TypeScript', 'AI Agent'],     desc: 'Universal AI agent workbench. Goal → plan → code → deliver. 190+ connectors, 200+ skills.',      href: 'https://github.com/RhythrosaLabs/otto-mate-2' },
+    { num: '03', title: 'Trinkets',            tags: ['Unity', '3D', 'Interactive'], desc: 'A virtual museum. Explore sound design, art & animations as a fully interactive 3D environment.', href: 'https://github.com/RhythrosaLabs' },
+    { num: '06', title: 'AR/XR Sound Design',  tags: ['AR/XR', 'Enterprise'],        desc: 'Red Bull · Microsoft · Intel · Amazon · Motorola · Lenovo · San Diego Padres · The Glenlivet',  href: 'https://www.linkedin.com/in/danielsheils' },
+    { num: '08', title: 'Soundstorm',          tags: ['Python', 'Audio', 'AI'],      desc: 'AI-driven audio platform for sound designers, composers, and experimental audio artists.',       href: 'https://github.com/RhythrosaLabs/soundstorm' },
+    { num: '14', title: 'Streamlit Creator',   tags: ['Python', 'Streamlit'],        desc: 'Official Streamlit Creator — autonomous AI tools for music, game design, and video production.', href: 'https://github.com/RhythrosaLabs/streamlit-components-demo' },
+  ];
+  let projIdx = 0, projInterval = null, projStarted = false;
+
+  function showProject() {
+    const slide = projApp.querySelector('.proj-slide');
+    if (!slide) return;
+    const p = FEATURED[projIdx];
+    slide.style.opacity = '0';
+    slide.style.transform = 'translateY(10px)';
+    setTimeout(() => {
+      slide.innerHTML = `
+        <div class="proj-num">${p.num}</div>
+        <h3 class="proj-title">${p.title}</h3>
+        <p class="proj-desc">${p.desc}</p>
+        <div class="proj-tags">${p.tags.map(t => `<span>${t}</span>`).join('')}</div>
+        <a href="${p.href}" target="_blank" class="proj-link">View Project ↗</a>`;
+      slide.style.opacity = '1';
+      slide.style.transform = 'translateY(0)';
+      projApp.querySelectorAll('.proj-dot').forEach((d, i) => d.classList.toggle('active', i === projIdx));
+    }, 200);
   }
 
-  function tick() {
-    if (!vx && !vy) { requestAnimationFrame(tick); return; }
-
-    const w = hero.clientWidth;
-    const h = hero.clientHeight;
-
-    // Sub-step movement
-    const sx = vx / SUBSTEPS;
-    const sy = vy / SUBSTEPS;
-
-    for (let s = 0; s < SUBSTEPS; s++) {
-      x += sx;
-      y += sy;
-
-      if (x < RADIUS)     { vx =  Math.abs(vx); x = RADIUS;     normalizeSpeed(); nudgeAngle(); }
-      if (x > w - RADIUS) { vx = -Math.abs(vx); x = w - RADIUS; normalizeSpeed(); nudgeAngle(); }
-      if (y < RADIUS)     { vy =  Math.abs(vy); y = RADIUS;     normalizeSpeed(); nudgeAngle(); }
-      if (y > h - RADIUS) { vy = -Math.abs(vy); y = h - RADIUS; normalizeSpeed(); nudgeAngle(); }
-
-      for (const r of collidables) {
-        if (resolveRect(r)) break;
-      }
-    }
-
-    // Cursor paddle: wider radius, direction-gated, cursor velocity imprint
-    const dx   = x - cursorX;
-    const dy   = y - cursorY;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-    if (dist < PADDLE_R && dist > 0) {
-      ball.classList.add('pong-hot');
-      const nx  = dx / dist;
-      const ny  = dy / dist;
-      const dot = vx * nx + vy * ny;
-      // Fire if ball moves toward cursor OR cursor sweeps toward ball (>2px/frame threshold)
-      const cursorApproach = cursorVX * (-nx) + cursorVY * (-ny);
-      if (dot < 0 || cursorApproach > 2) {
-        vx -= 2 * dot * nx;
-        vy -= 2 * dot * ny;
-        // Imprint cursor momentum — lets a fast swipe launch the ball
-        const K = 0.06;
-        vx += cursorVX * K;
-        vy += cursorVY * K;
-        x = cursorX + nx * (PADDLE_R + 2);
-        y = cursorY + ny * (PADDLE_R + 2);
-        // Clamp: cursor can boost up to 2× base speed but not below it
-        const spd = Math.sqrt(vx * vx + vy * vy);
-        const cap = SPEED * 2.0;
-        if (spd > cap)  { vx = (vx / spd) * cap;   vy = (vy / spd) * cap; }
-        if (spd < SPEED){ vx = (vx / spd) * SPEED; vy = (vy / spd) * SPEED; }
-        nudgeAngle();
-      }
-    } else {
-      ball.classList.remove('pong-hot');
-    }
-
-    // Trail: record position, draw fading dots on canvas using current accent color
-    trail.push({ x, y });
-    if (trail.length > TRAIL_LEN) trail.shift();
-
-    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#c8f542';
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    trail.forEach((pt, i) => {
-      const t = (i + 1) / trail.length;
-      ctx.beginPath();
-      ctx.arc(pt.x, pt.y, RADIUS * t * 0.8, 0, Math.PI * 2);
-      ctx.fillStyle = accentColor;
-      ctx.globalAlpha = t * 0.18;
-      ctx.fill();
+  function startProjects() {
+    projStarted = true;
+    projApp.innerHTML = '<div class="proj-slide"></div><div class="proj-dots"></div>';
+    FEATURED.forEach((_, i) => {
+      const d = document.createElement('button');
+      d.className = 'proj-dot' + (i === 0 ? ' active' : '');
+      d.addEventListener('click', () => {
+        projIdx = i; showProject();
+        clearInterval(projInterval);
+        projInterval = setInterval(nextProj, 4500);
+      });
+      projApp.querySelector('.proj-dots').appendChild(d);
     });
-    ctx.globalAlpha = 1;
-
-    ball.style.left = x + 'px';
-    ball.style.top  = y + 'px';
-    requestAnimationFrame(tick);
+    showProject();
+    projInterval = setInterval(nextProj, 4500);
   }
 
-  requestAnimationFrame(tick);
+  function nextProj() { projIdx = (projIdx + 1) % FEATURED.length; showProject(); }
+
+  /* ============================================================
+     TERMINAL TYPEWRITER
+     ============================================================ */
+  const termApp = document.getElementById('appTerminal');
+  let termStarted = false;
+  const TLINES = [
+    { t: 'cmd', s: 'whoami' },
+    { t: 'out', s: 'daniel_sheils' },
+    { t: 'cmd', s: 'cat skills.txt' },
+    { t: 'out', s: 'Sound Design · AI/ML · Game Dev' },
+    { t: 'out', s: 'AR/VR/XR · Streamlit · Unity · Python' },
+    { t: 'out', s: 'Music · Mixing · Visual Arts · Robotics' },
+    { t: 'cmd', s: 'ls projects/' },
+    { t: 'out', s: 'ottomate/  brainstormer/  trinkets/' },
+    { t: 'out', s: 'soundstorm/  duogpt/  game-maker/' },
+    { t: 'out', s: 'mend-mv/  the-raven-mv/  +7 more...' },
+    { t: 'cmd', s: 'cat clients.txt' },
+    { t: 'out', s: 'Red Bull · Microsoft · Intel' },
+    { t: 'out', s: 'Amazon · Motorola · Lenovo' },
+    { t: 'out', s: 'San Diego Padres · The Glenlivet' },
+    { t: 'cmd', s: 'echo $EXPERIENCE' },
+    { t: 'out', s: '18+ years creative practice' },
+    { t: 'cmd', s: 'echo $ALBUMS' },
+    { t: 'out', s: '~30 solo & collab albums' },
+    { t: 'cmd', s: 'ping creativity.io' },
+    { t: 'out', s: 'PONG: reply from creativity.io ✓' },
+  ];
+
+  function startTerminal() {
+    termStarted = true;
+    termApp.innerHTML = '<div class="term-body" id="termBody"></div>';
+    runTerm(document.getElementById('termBody'), 0);
+  }
+
+  function runTerm(body, i) {
+    if (i >= TLINES.length) {
+      setTimeout(() => { body.innerHTML = ''; runTerm(body, 0); }, 2500);
+      return;
+    }
+    const line = TLINES[i];
+    const div = document.createElement('div');
+    div.className = 'term-line term-' + line.t;
+    body.appendChild(div);
+    if (line.t === 'cmd') {
+      div.textContent = '$ ';
+      let j = 0;
+      const iv = setInterval(() => {
+        div.textContent = '$ ' + line.s.slice(0, ++j);
+        body.scrollTop = body.scrollHeight;
+        if (j >= line.s.length) { clearInterval(iv); setTimeout(() => runTerm(body, i + 1), 350); }
+      }, 52);
+    } else {
+      div.textContent = line.s;
+      body.scrollTop = body.scrollHeight;
+      setTimeout(() => runTerm(body, i + 1), 100);
+    }
+  }
+
+  /* ── Init ── */
+  resizePong();
+  setTimeout(() => { resizePong(); resetBall(true); requestAnimationFrame(tickPong); }, 400);
+  window.addEventListener('resize', resizePong);
 }());
-/* ==== PONG END ==== */
+/* ==== PANEL END ==== */
