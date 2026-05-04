@@ -1347,30 +1347,38 @@ footer {
   transition: opacity 0.22s ease, transform 0.22s ease;
 }
 
-.proj-thumb {
+.proj-icon {
   width: 100%;
-  height: 108px;
-  overflow: hidden;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 1.5rem;
   flex-shrink: 0;
-  background: linear-gradient(135deg, var(--bg2) 0%, var(--accent-glow) 100%);
-  position: relative;
+  border-bottom: 1px solid var(--border);
+  gap: 1rem;
 }
 
-.proj-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-  opacity: 0.88;
-  display: block;
-  transition: opacity 0.3s;
+.proj-icon-glyph {
+  font-size: 2rem;
+  color: var(--accent);
+  line-height: 1;
+  opacity: 0.7;
+  flex-shrink: 0;
 }
 
-.proj-thumb:hover img { opacity: 1; }
+.proj-icon-label {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1.5;
+}
 
 .proj-body {
   flex: 1;
-  padding: 0.9rem 1.5rem 0.5rem;
+  padding: 0.85rem 1.5rem 0.5rem;
   display: flex;
   flex-direction: column;
   min-height: 0;

@@ -368,7 +368,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
 
   /* ============================================================
-     GAMES — Pong · Snake · Breakout
+     GAMES — Pong · Snake · Breakout · Tetris (all arrow-key)
      ============================================================ */
   const pongApp = document.getElementById('appPong');
   pongApp.innerHTML = `
@@ -376,6 +376,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       <button class="game-btn active" data-game="pong">PONG</button>
       <button class="game-btn" data-game="snake">SNAKE</button>
       <button class="game-btn" data-game="breakout">BREAKOUT</button>
+      <button class="game-btn" data-game="tetris">TETRIS</button>
     </div>`;
   const cv = document.createElement('canvas');
   cv.className = 'game-cv';
@@ -411,16 +412,18 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       if (activeGame === 'pong')     initPong();
       if (activeGame === 'snake')    initSnake();
       if (activeGame === 'breakout') initBreakout();
+      if (activeGame === 'tetris')   initTetris();
     });
   });
 
-  /* ── PONG ── */
-  const BALL_R = 5, PAD_W = 66, PAD_H = 6, PAD_MARG = 16, BSPEED = 3.8, AI_SPD = 2.5;
+  /* ── PONG — arrow keys move player paddle ── */
+  const BALL_R = 5, PAD_W = 66, PAD_H = 6, PAD_MARG = 16, BSPEED = 3.4, AI_SPD = 2.2;
   let bx, by, bvx, bvy, playerX, aiX, pScore, aScore;
-  let pongMouseX = -1;
+  let pongLeft = false, pongRight = false;
 
   function initPong() {
     playerX = aiX = cw / 2; pScore = aScore = 0;
+    pongLeft = pongRight = false;
     resetBall(true);
     gameRAF = requestAnimationFrame(tickPong);
   }
@@ -433,10 +436,11 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   function tickPong() {
     if (activeGame !== 'pong') return;
     const ac = getAccent();
-    if (pongMouseX >= 0) playerX += (pongMouseX - playerX) * 0.14;
-    playerX = Math.max(PAD_W / 2, Math.min(cw - PAD_W / 2, playerX));
+    const PAD_SPD = 4.5;
+    if (pongLeft)  playerX = Math.max(PAD_W / 2,     playerX - PAD_SPD);
+    if (pongRight) playerX = Math.min(cw - PAD_W / 2, playerX + PAD_SPD);
     const diff = bx - aiX;
-    aiX += Math.sign(diff) * Math.min(Math.abs(diff) * 0.08, AI_SPD);
+    aiX += Math.sign(diff) * Math.min(Math.abs(diff) * 0.07, AI_SPD);
     aiX = Math.max(PAD_W / 2, Math.min(cw - PAD_W / 2, aiX));
     bx += bvx; by += bvy;
     if (bx < BALL_R)      { bx = BALL_R;      bvx =  Math.abs(bvx); }
@@ -445,14 +449,14 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     if (bvy > 0 && by + BALL_R >= plY && by - BALL_R <= plY + PAD_H &&
         bx >= playerX - PAD_W / 2 && bx <= playerX + PAD_W / 2) {
       bvy = -Math.abs(bvy); by = plY - BALL_R;
-      const off = (bx - playerX) / (PAD_W / 2); bvx += off * 1.8;
+      const off = (bx - playerX) / (PAD_W / 2); bvx += off * 1.5;
       const s = Math.sqrt(bvx*bvx+bvy*bvy); bvx=bvx/s*BSPEED; bvy=bvy/s*BSPEED;
     }
     const aiPY = PAD_MARG;
     if (bvy < 0 && by - BALL_R <= aiPY + PAD_H && by + BALL_R >= aiPY &&
         bx >= aiX - PAD_W / 2 && bx <= aiX + PAD_W / 2) {
       bvy = Math.abs(bvy); by = aiPY + PAD_H + BALL_R;
-      const off = (bx - aiX) / (PAD_W / 2); bvx += off * 0.9;
+      const off = (bx - aiX) / (PAD_W / 2); bvx += off * 0.8;
       const s = Math.sqrt(bvx*bvx+bvy*bvy); bvx=bvx/s*BSPEED; bvy=bvy/s*BSPEED;
     }
     if (by + BALL_R < 0)  { pScore++; resetBall(true); }
@@ -460,7 +464,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     pc.clearRect(0, 0, cw, ch);
     pc.save(); pc.setLineDash([4,10]); pc.strokeStyle='rgba(255,255,255,0.05)'; pc.lineWidth=1;
     pc.beginPath(); pc.moveTo(0,ch/2); pc.lineTo(cw,ch/2); pc.stroke(); pc.restore();
-    pc.fillStyle='rgba(255,255,255,0.22)'; pc.fillRect(aiX-PAD_W/2,PAD_MARG,PAD_W,PAD_H);
+    pc.fillStyle='rgba(255,255,255,0.2)'; pc.fillRect(aiX-PAD_W/2,PAD_MARG,PAD_W,PAD_H);
     pc.save(); pc.fillStyle=ac; pc.shadowBlur=10; pc.shadowColor=ac;
     pc.fillRect(playerX-PAD_W/2,ch-PAD_MARG-PAD_H,PAD_W,PAD_H); pc.restore();
     pc.save(); pc.beginPath(); pc.arc(bx,by,BALL_R,0,Math.PI*2);
@@ -470,15 +474,16 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     pc.textAlign='right'; pc.fillText(pScore,cw-12,ch-10);
     if (pScore+aScore===0) {
       pc.font="9px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.1)';
-      pc.textAlign='center'; pc.fillText('MOVE CURSOR TO PLAY',cw/2,ch-8);
+      pc.textAlign='center'; pc.fillText('← → ARROWS TO PLAY',cw/2,ch-8);
     }
     gameRAF = requestAnimationFrame(tickPong);
   }
 
-  /* ── SNAKE ── */
+  /* ── SNAKE — collect skill words ── */
   const CELL = 16;
-  let snakeBody, snakeDir, snakeNext, snakeFood, snakeScore, snakeDead, snakeLastTime;
-  const SNAKE_MS = 130;
+  const SKILL_WORDS = ['AI','3D','DAW','VR','AR','XR','SFX','OSC','MIDI','DSP','RAP','MIX'];
+  let snakeBody, snakeDir, snakeNext, snakeFood, snakeFoodWord, snakeScore, snakeDead, snakeLastTime;
+  const SNAKE_MS = 145;
 
   function initSnake() {
     const cols = Math.floor(cw / CELL), rows = Math.floor(ch / CELL);
@@ -494,6 +499,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     do { pos = {x:Math.floor(Math.random()*cols), y:Math.floor(Math.random()*rows)}; }
     while (snakeBody.some(s => s.x===pos.x && s.y===pos.y));
     snakeFood = pos;
+    snakeFoodWord = SKILL_WORDS[Math.floor(Math.random() * SKILL_WORDS.length)];
   }
   function tickSnake(ts) {
     if (activeGame !== 'snake') return;
@@ -512,62 +518,61 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       }
     }
     pc.clearRect(0,0,cw,ch);
-    pc.fillStyle='rgba(255,255,255,0.025)';
+    pc.fillStyle='rgba(255,255,255,0.02)';
     for (let x=CELL;x<cw;x+=CELL) for (let y=CELL;y<ch;y+=CELL) pc.fillRect(x-0.5,y-0.5,1,1);
-    pc.save(); pc.fillStyle=ac; pc.shadowBlur=12; pc.shadowColor=ac;
-    pc.fillRect(snakeFood.x*CELL+3,snakeFood.y*CELL+3,CELL-6,CELL-6); pc.restore();
+    // food word
+    pc.save();
+    pc.font="bold 8px 'Space Mono',monospace";
+    pc.fillStyle=ac; pc.shadowBlur=8; pc.shadowColor=ac;
+    pc.textAlign='center'; pc.textBaseline='middle';
+    pc.fillText(snakeFoodWord, snakeFood.x*CELL+CELL/2, snakeFood.y*CELL+CELL/2);
+    pc.restore();
     const rgb = hexToRgb(ac);
     snakeBody.forEach((seg,i) => {
       const t = 1 - i/snakeBody.length;
-      pc.fillStyle = i===0 ? ac : `rgba(${rgb},${0.2+t*0.55})`;
+      pc.fillStyle = i===0 ? ac : `rgba(${rgb},${0.18+t*0.5})`;
       pc.fillRect(seg.x*CELL+1,seg.y*CELL+1,CELL-2,CELL-2);
     });
     pc.font="700 11px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.2)';
-    pc.textAlign='left'; pc.fillText(snakeScore,8,18);
+    pc.textBaseline='alphabetic'; pc.textAlign='left'; pc.fillText(snakeScore,8,18);
     if (snakeDead) {
-      pc.fillStyle='rgba(8,8,8,0.72)'; pc.fillRect(0,0,cw,ch);
-      pc.font="700 14px 'Space Mono',monospace"; pc.fillStyle=ac;
+      pc.fillStyle='rgba(8,8,8,0.75)'; pc.fillRect(0,0,cw,ch);
+      pc.font="700 13px 'Space Mono',monospace"; pc.fillStyle=ac;
       pc.textAlign='center'; pc.fillText('GAME OVER',cw/2,ch/2-12);
       pc.font="10px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.3)';
       pc.fillText('SCORE: '+snakeScore,cw/2,ch/2+8);
-      pc.fillText('CLICK TO RESTART',cw/2,ch/2+26);
+      pc.fillText('ENTER TO RESTART',cw/2,ch/2+26);
     } else if (snakeScore===0) {
       pc.font="9px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.12)';
-      pc.textAlign='center'; pc.fillText('ARROWS / WASD',cw/2,ch-8);
+      pc.textAlign='center'; pc.fillText('COLLECT SKILL WORDS  ←↑↓→',cw/2,ch-8);
     }
     gameRAF = requestAnimationFrame(tickSnake);
   }
-  document.addEventListener('keydown', e => {
-    if (activeGame !== 'snake') return;
-    const map = {ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1},
-                 a:{x:-1,y:0},d:{x:1,y:0},w:{x:0,y:-1},s:{x:0,y:1}};
-    const next = map[e.key];
-    if (next && !(next.x===-snakeDir.x && next.y===-snakeDir.y)) { snakeNext=next; e.preventDefault(); }
-  });
-
-  /* ── BREAKOUT ── */
-  const BW=56, BH=5, BPAD_MARG=18, BB_R=5, BRK_SPEED=4.2;
+  /* ── BREAKOUT — arrow keys, slower speed ── */
+  const BW=60, BH=6, BPAD_MARG=18, BB_R=5, BRK_SPEED=2.6;
   const BRK_ROWS=5, BRK_COLS=8;
   let brkBx,brkBy,brkBvx,brkBvy,brkPadX,brkBricks,brkScore,brkDead;
-  let brkMouseX = -1;
+  let brkLeft=false, brkRight=false;
 
   function initBreakout() {
     brkPadX=cw/2; brkScore=0; brkDead=false;
     brkBx=cw/2; brkBy=ch-55;
-    const a=-Math.PI/2+(Math.random()-0.5)*0.9;
+    const a=-Math.PI/2+(Math.random()-0.5)*0.7;
     brkBvx=Math.cos(a)*BRK_SPEED; brkBvy=Math.sin(a)*BRK_SPEED;
+    brkLeft=brkRight=false;
     brkBricks=[];
-    const bW=(cw-14)/BRK_COLS, bHh=13;
+    const bW=(cw-14)/BRK_COLS, bHh=11;
     for(let r=0;r<BRK_ROWS;r++) for(let c=0;c<BRK_COLS;c++)
-      brkBricks.push({x:7+c*(bW+2),y:20+r*(bHh+3),w:bW,h:bHh,alive:true,row:r});
+      brkBricks.push({x:7+c*(bW+2),y:22+r*(bHh+4),w:bW,h:bHh,alive:true,row:r});
     gameRAF=requestAnimationFrame(tickBreakout);
   }
   function tickBreakout() {
     if (activeGame !== 'breakout') return;
     const ac = getAccent();
+    const BRK_PAD_SPD = 5;
     if (!brkDead) {
-      if (brkMouseX>=0) brkPadX+=(brkMouseX-brkPadX)*0.14;
-      brkPadX=Math.max(BW/2,Math.min(cw-BW/2,brkPadX));
+      if (brkLeft)  brkPadX=Math.max(BW/2,     brkPadX-BRK_PAD_SPD);
+      if (brkRight) brkPadX=Math.min(cw-BW/2,  brkPadX+BRK_PAD_SPD);
       brkBx+=brkBvx; brkBy+=brkBvy;
       if(brkBx<BB_R)      {brkBx=BB_R;      brkBvx= Math.abs(brkBvx);}
       if(brkBx>cw-BB_R)   {brkBx=cw-BB_R;   brkBvx=-Math.abs(brkBvx);}
@@ -614,63 +619,180 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       pc.textAlign='center'; pc.fillText('GAME OVER',cw/2,ch/2-12);
       pc.font="10px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.3)';
       pc.fillText('SCORE: '+brkScore,cw/2,ch/2+8);
-      pc.fillText('CLICK TO RESTART',cw/2,ch/2+26);
+      pc.fillText('ENTER TO RESTART',cw/2,ch/2+26);
     } else if(brkScore===0) {
       pc.font="9px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.12)';
-      pc.textAlign='center'; pc.fillText('MOVE CURSOR TO PLAY',cw/2,ch-5);
+      pc.textAlign='center'; pc.fillText('← → ARROWS TO MOVE',cw/2,ch-5);
     }
     gameRAF=requestAnimationFrame(tickBreakout);
   }
 
-  /* ── Click to restart dead games ── */
-  cv.addEventListener('click', () => {
-    if (activeGame==='snake'    && snakeDead) initSnake();
-    if (activeGame==='breakout' && brkDead)   initBreakout();
-  });
+  /* ── TETRIS — standard arrow controls ── */
+  const TET_COLS = 10;
+  const PIECES = [
+    [[1,1,1,1]],
+    [[1,1],[1,1]],
+    [[0,1,0],[1,1,1]],
+    [[1,0,0],[1,1,1]],
+    [[0,0,1],[1,1,1]],
+    [[1,1,0],[0,1,1]],
+    [[0,1,1],[1,1,0]],
+  ];
+  let tetBoard,tetPiece,tetPX,tetPY,tetNext,tetScore,tetDead,tetLastTime,tetDropMs;
 
-  /* ── Shared cursor tracking ── */
-  panel.addEventListener('mousemove', e => {
-    const r = cv.getBoundingClientRect();
-    const x = e.clientX - r.left;
-    pongMouseX = activeGame==='pong'     ? x : -1;
-    brkMouseX  = activeGame==='breakout' ? x : -1;
+  function tetCellW() { return Math.floor(cw / TET_COLS); }
+  function tetRows()  { return Math.floor(ch / tetCellW()); }
+
+  function initTetris() {
+    const rows = tetRows();
+    tetBoard = Array.from({length:rows}, () => new Array(TET_COLS).fill(0));
+    tetScore = 0; tetDead = false; tetLastTime = 0; tetDropMs = 600;
+    tetNext = randomPiece(); spawnTet();
+    gameRAF = requestAnimationFrame(tickTetris);
+  }
+  function randomPiece() { return JSON.parse(JSON.stringify(PIECES[Math.floor(Math.random()*PIECES.length)])); }
+  function spawnTet() {
+    tetPiece = tetNext; tetNext = randomPiece();
+    tetPX = Math.floor((TET_COLS - tetPiece[0].length) / 2);
+    tetPY = 0;
+    if (tetCollide(tetPiece,tetPX,tetPY)) tetDead = true;
+  }
+  function tetCollide(piece,px,py) {
+    for(let r=0;r<piece.length;r++) for(let c=0;c<piece[r].length;c++) {
+      if(!piece[r][c]) continue;
+      const nx=px+c, ny=py+r;
+      if(nx<0||nx>=TET_COLS||ny>=tetRows()) return true;
+      if(ny>=0&&tetBoard[ny]&&tetBoard[ny][nx]) return true;
+    }
+    return false;
+  }
+  function tetRotate(p) { return p[0].map((_,i)=>p.map(row=>row[i]).reverse()); }
+  function tetLock() {
+    for(let r=0;r<tetPiece.length;r++) for(let c=0;c<tetPiece[r].length;c++) {
+      if(!tetPiece[r][c]) continue;
+      const ny=tetPY+r;
+      if(ny>=0&&tetBoard[ny]) tetBoard[ny][tetPX+c]=1;
+    }
+    let cleared=0;
+    for(let r=tetBoard.length-1;r>=0;r--) {
+      if(tetBoard[r].every(c=>c)){tetBoard.splice(r,1);tetBoard.unshift(new Array(TET_COLS).fill(0));cleared++;r++;}
+    }
+    tetScore+=cleared*cleared*10+1;
+    if(cleared>=2) tetDropMs=Math.max(120,tetDropMs-15);
+    spawnTet();
+  }
+  function tickTetris(ts) {
+    if(activeGame!=='tetris') return;
+    const ac=getAccent(), cw2=tetCellW(), ch2=cw2;
+    if(!tetDead&&ts-tetLastTime>=tetDropMs) {
+      tetLastTime=ts;
+      if(!tetCollide(tetPiece,tetPX,tetPY+1)) tetPY++; else tetLock();
+    }
+    pc.clearRect(0,0,cw,ch);
+    const rgb=hexToRgb(ac);
+    for(let r=0;r<tetBoard.length;r++) for(let c=0;c<TET_COLS;c++) {
+      if(tetBoard[r][c]) {
+        pc.fillStyle=`rgba(${rgb},0.5)`; pc.fillRect(c*cw2+1,r*ch2+1,cw2-2,ch2-2);
+        pc.strokeStyle=`rgba(${rgb},0.2)`; pc.lineWidth=0.5; pc.strokeRect(c*cw2+1,r*ch2+1,cw2-2,ch2-2);
+      } else {
+        pc.strokeStyle='rgba(255,255,255,0.03)'; pc.lineWidth=0.5; pc.strokeRect(c*cw2,r*ch2,cw2,ch2);
+      }
+    }
+    if(!tetDead) {
+      let gy=tetPY; while(!tetCollide(tetPiece,tetPX,gy+1)) gy++;
+      for(let r=0;r<tetPiece.length;r++) for(let c=0;c<tetPiece[r].length;c++) {
+        if(!tetPiece[r][c]) continue;
+        pc.fillStyle=`rgba(${rgb},0.1)`; pc.fillRect((tetPX+c)*cw2+1,(gy+r)*ch2+1,cw2-2,ch2-2);
+      }
+      pc.save(); pc.fillStyle=ac; pc.shadowBlur=8; pc.shadowColor=ac;
+      for(let r=0;r<tetPiece.length;r++) for(let c=0;c<tetPiece[r].length;c++) {
+        if(!tetPiece[r][c]) continue;
+        pc.fillRect((tetPX+c)*cw2+1,(tetPY+r)*ch2+1,cw2-2,ch2-2);
+      }
+      pc.restore();
+    }
+    pc.font="700 11px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.2)';
+    pc.textAlign='right'; pc.fillText(tetScore,cw-6,14);
+    if(tetScore===0&&!tetDead){
+      pc.font="9px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.12)';
+      pc.textAlign='center'; pc.fillText('← → ↑ROTATE ↓DROP  SPC=FALL',cw/2,ch-5);
+    }
+    if(tetDead){
+      pc.fillStyle='rgba(8,8,8,0.8)'; pc.fillRect(0,0,cw,ch);
+      pc.font="700 13px 'Space Mono',monospace"; pc.fillStyle=ac;
+      pc.textAlign='center'; pc.fillText('GAME OVER',cw/2,ch/2-12);
+      pc.font="10px 'Space Mono',monospace"; pc.fillStyle='rgba(255,255,255,0.3)';
+      pc.fillText('SCORE: '+tetScore,cw/2,ch/2+8);
+      pc.fillText('ENTER TO RESTART',cw/2,ch/2+26);
+    }
+    gameRAF=requestAnimationFrame(tickTetris);
+  }
+
+  /* ── Unified keyboard handler ── */
+  document.addEventListener('keydown', e => {
+    if(activeGame==='pong') {
+      if(e.key==='ArrowLeft')  { pongLeft=true;  e.preventDefault(); }
+      if(e.key==='ArrowRight') { pongRight=true; e.preventDefault(); }
+    }
+    if(activeGame==='snake') {
+      const map={ArrowLeft:{x:-1,y:0},ArrowRight:{x:1,y:0},ArrowUp:{x:0,y:-1},ArrowDown:{x:0,y:1}};
+      const next=map[e.key];
+      if(next&&!(next.x===-snakeDir.x&&next.y===-snakeDir.y)){snakeNext=next;e.preventDefault();}
+      if(e.key==='Enter'&&snakeDead) initSnake();
+    }
+    if(activeGame==='breakout') {
+      if(e.key==='ArrowLeft')  { brkLeft=true;  e.preventDefault(); }
+      if(e.key==='ArrowRight') { brkRight=true; e.preventDefault(); }
+      if(e.key==='Enter'&&brkDead) initBreakout();
+    }
+    if(activeGame==='tetris') {
+      if(e.key==='ArrowLeft' &&!tetCollide(tetPiece,tetPX-1,tetPY)){tetPX--;e.preventDefault();}
+      if(e.key==='ArrowRight'&&!tetCollide(tetPiece,tetPX+1,tetPY)){tetPX++;e.preventDefault();}
+      if(e.key==='ArrowDown' ){if(!tetCollide(tetPiece,tetPX,tetPY+1))tetPY++;e.preventDefault();}
+      if(e.key==='ArrowUp')  {const rot=tetRotate(tetPiece);if(!tetCollide(rot,tetPX,tetPY))tetPiece=rot;e.preventDefault();}
+      if(e.key===' '){let d=tetPY;while(!tetCollide(tetPiece,tetPX,d+1))d++;tetPY=d;tetLock();e.preventDefault();}
+      if(e.key==='Enter'&&tetDead) initTetris();
+    }
   });
-  panel.addEventListener('mouseleave', () => { pongMouseX=-1; brkMouseX=-1; });
+  document.addEventListener('keyup', e => {
+    if(e.key==='ArrowLeft')  { pongLeft=false;  brkLeft=false; }
+    if(e.key==='ArrowRight') { pongRight=false; brkRight=false; }
+  });
 
   /* ============================================================
-     PROJECTS CAROUSEL — with thumbnails + direct links
+     PROJECTS CAROUSEL — icon glyphs, direct links
      ============================================================ */
   const projApp = document.getElementById('appProjects');
   const FEATURED = [
     {
+      icon: '◉', iconLabel: 'AI · AGENT',
       title: 'Ottomate', tags: ['TypeScript','AI Agent','Automation'],
       desc: 'Universal AI agent workbench. Goal → plan → code → deliver. 190+ connectors, 200+ skills.',
-      href: 'https://github.com/RhythrosaLabs/otto-mate-2',
-      img:  'https://opengraph.githubassets.com/1/RhythrosaLabs/otto-mate-2'
+      href: 'https://github.com/RhythrosaLabs/otto-mate-2'
     },
     {
+      icon: '⬡', iconLabel: 'AI · CREATIVE',
       title: 'brAInstormer', tags: ['AI','Python','Streamlit'],
-      desc: 'All-in-one AI creative suite. Generate images, video, audio & full marketing plans.',
-      href: 'https://github.com/RhythrosaLabs',
-      img:  'https://opengraph.githubassets.com/1/RhythrosaLabs/brainstormer'
+      desc: 'All-in-one AI creative suite. Generate images, video, audio & full marketing plans in one interface.',
+      href: 'https://github.com/RhythrosaLabs'
     },
     {
+      icon: '◈', iconLabel: 'UNITY · 3D',
       title: 'Trinkets', tags: ['Unity','3D','Interactive'],
-      desc: 'A virtual museum. Explore original sound design, art & animations in 3D. Mac only.',
-      href: 'https://noodlebake.itch.io/trinkets',
-      img:  'https://img.itch.zone/aW1nLzEyNjc5MjMzLnBuZw==/original/3X6xj5.png'
+      desc: 'A virtual museum. Explore original sound design, art & animations in 3D. Headphones recommended.',
+      href: 'https://noodlebake.itch.io/trinkets'
     },
     {
+      icon: '♦', iconLabel: 'MUSIC · VIDEO',
       title: 'Mend — Music Video', tags: ['Music Video','AI Animation','2022'],
-      desc: 'Directed & produced by Daniel Sheils. Music by Sidestep Complex. Early AI animation experiment.',
-      href: 'https://www.youtube.com/watch?v=1-IJfLo25s4',
-      img:  'https://img.youtube.com/vi/1-IJfLo25s4/mqdefault.jpg'
+      desc: 'Directed & produced by Daniel Sheils. Music by Sidestep Complex. Early AI animation captured frame by frame.',
+      href: 'https://www.youtube.com/watch?v=1-IJfLo25s4'
     },
     {
+      icon: '⟁', iconLabel: 'STREAMLIT',
       title: 'Streamlit Components', tags: ['Python','Streamlit','AI Tools'],
       desc: 'Official Streamlit Creator — autonomous tools for music, game design, and video production.',
-      href: 'https://github.com/RhythrosaLabs/streamlit-components-demo',
-      img:  'https://opengraph.githubassets.com/1/RhythrosaLabs/streamlit-components-demo'
+      href: 'https://github.com/RhythrosaLabs/streamlit-components-demo'
     },
   ];
   let projIdx=0, projInterval=null, projStarted=false;
@@ -683,8 +805,9 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     slide.style.transform = 'translateY(8px)';
     setTimeout(() => {
       slide.innerHTML = `
-        <div class="proj-thumb">
-          <img src="${p.img}" alt="${p.title}" onerror="this.style.display='none'">
+        <div class="proj-icon">
+          <span class="proj-icon-glyph">${p.icon}</span>
+          <span class="proj-icon-label">${p.iconLabel}</span>
         </div>
         <div class="proj-body">
           <h3 class="proj-title">${p.title}</h3>
@@ -723,25 +846,38 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   let termStarted = false;
   const TLINES = [
     { t:'cmd', s:'whoami' },
-    { t:'out', s:'daniel_sheils' },
+    { t:'out', s:'daniel_sheils // creative technologist' },
+    { t:'cmd', s:'uname -a' },
+    { t:'out', s:'Human · Musician · Builder · v18.0' },
     { t:'cmd', s:'cat skills.txt' },
-    { t:'out', s:'Sound Design · AI/ML · Game Dev' },
-    { t:'out', s:'AR/VR/XR · Streamlit · Unity · Python' },
-    { t:'out', s:'Music · Mixing · Visual Arts · Robotics' },
+    { t:'out', s:'Sound Design  AR/VR/XR  AI/ML' },
+    { t:'out', s:'Game Dev  Unity  Python  Streamlit' },
+    { t:'out', s:'Music  Mixing  Mastering  Live Sound' },
+    { t:'out', s:'Visual Arts  3D  Video  Robotics' },
     { t:'cmd', s:'ls projects/' },
-    { t:'out', s:'ottomate/  brainstormer/  trinkets/' },
-    { t:'out', s:'soundstorm/  duogpt/  game-maker/' },
-    { t:'out', s:'mend-mv/  the-raven-mv/  +7 more...' },
+    { t:'out', s:'ottomate/       brainstormer/' },
+    { t:'out', s:'trinkets/       soundstorm/' },
+    { t:'out', s:'duogpt/         game-maker/' },
+    { t:'out', s:'prism-rider/    mend-mv/' },
+    { t:'out', s:'labelflow/      the-raven-mv/' },
+    { t:'out', s:'streamlit-components/  +3 more' },
     { t:'cmd', s:'cat clients.txt' },
-    { t:'out', s:'Red Bull · Microsoft · Intel' },
-    { t:'out', s:'Amazon · Motorola · Lenovo' },
-    { t:'out', s:'San Diego Padres · The Glenlivet' },
-    { t:'cmd', s:'echo $EXPERIENCE' },
-    { t:'out', s:'18+ years creative practice' },
-    { t:'cmd', s:'echo $ALBUMS' },
-    { t:'out', s:'~30 solo & collab albums' },
-    { t:'cmd', s:'ping creativity.io' },
-    { t:'out', s:'reply from creativity.io: time=0ms ✓' },
+    { t:'out', s:'Red Bull · Microsoft · Intel · Amazon' },
+    { t:'out', s:'Motorola · Lenovo · The Glenlivet' },
+    { t:'out', s:"San Diego Padres · Alzheimer's Assoc." },
+    { t:'cmd', s:'cat music.txt' },
+    { t:'out', s:'~30 solo & collab albums recorded' },
+    { t:'out', s:'hundreds of artists produced & mixed' },
+    { t:'out', s:'toured nationally · radio shows · DJ sets' },
+    { t:'cmd', s:'git log --oneline | head' },
+    { t:'out', s:'a4f3e1 Add AI agent workbench' },
+    { t:'out', s:'9c2d88 Ship Streamlit creator tools' },
+    { t:'out', s:'3e91fa Build Trinkets 3D museum' },
+    { t:'out', s:'77b2c0 Compose Mend music video' },
+    { t:'cmd', s:'echo $STATUS' },
+    { t:'out', s:'available for hire · open to collabs' },
+    { t:'cmd', s:'open https://linkedin.com/in/danielsheils' },
+    { t:'out', s:'launching browser...' },
   ];
   function startTerminal() {
     termStarted = true;
@@ -749,7 +885,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     runTerm(document.getElementById('termBody'), 0);
   }
   function runTerm(body, i) {
-    if (i >= TLINES.length) { setTimeout(()=>{ body.innerHTML=''; runTerm(body,0); },2500); return; }
+    if (i >= TLINES.length) { setTimeout(()=>{ body.innerHTML=''; runTerm(body,0); },2800); return; }
     const line = TLINES[i];
     const div = document.createElement('div');
     div.className = 'term-line term-'+line.t;
@@ -759,12 +895,12 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       const iv=setInterval(()=>{
         div.textContent='$ '+line.s.slice(0,++j);
         body.scrollTop=body.scrollHeight;
-        if(j>=line.s.length){clearInterval(iv);setTimeout(()=>runTerm(body,i+1),350);}
-      },52);
+        if(j>=line.s.length){clearInterval(iv);setTimeout(()=>runTerm(body,i+1),320);}
+      },48);
     } else {
       div.textContent=line.s;
       body.scrollTop=body.scrollHeight;
-      setTimeout(()=>runTerm(body,i+1),100);
+      setTimeout(()=>runTerm(body,i+1),80);
     }
   }
 
@@ -775,6 +911,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     if (activeGame==='pong')     initPong();
     if (activeGame==='snake')    initSnake();
     if (activeGame==='breakout') initBreakout();
+    if (activeGame==='tetris')   initTetris();
   });
 }());
 /* ==== PANEL END ==== */
