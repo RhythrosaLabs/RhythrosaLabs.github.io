@@ -374,104 +374,10 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       if (!on && a.dataset.app === 'pong')                cancelGame();
       if (on && name === 'terminal' && !termStarted)      startTerminal();
       if (on && name === 'projects' && !projStarted)      startProjects();
-      if (on && name === 'create'   && !createStarted)    initCreate();
       if (on && name === 'community'&& !commStarted)      initCommunity();
     });
   }
   tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
-
-  /* ============================================================
-     CREATE TAB — pixel sketchpad + notepad with download
-     ============================================================ */
-  const createApp = document.getElementById('appCreate');
-  let createStarted = false;
-  function initCreate() {
-    createStarted = true;
-    const PENCIL_SIZES = [2, 5, 10];
-    createApp.innerHTML = `
-      <div class="create-tabs">
-        <button class="create-tab active" data-ctab="sketch">⊙ SKETCH</button>
-        <button class="create-tab" data-ctab="note">≡ NOTE</button>
-      </div>
-      <div class="create-pane active" id="cpSketch">
-        <div class="sketch-toolbar">
-          <button class="sk-btn sk-clear" title="Clear">✕</button>
-          <button class="sk-btn sk-eraser" title="Eraser">□</button>
-          <button class="sk-btn sk-draw active" title="Draw">•</button>
-          <span class="sk-sizes">
-            <button class="sk-sz active" data-sz="2">S</button>
-            <button class="sk-sz" data-sz="5">M</button>
-            <button class="sk-sz" data-sz="10">L</button>
-          </span>
-          <button class="sk-btn sk-dl" title="Download PNG">↓ PNG</button>
-        </div>
-        <canvas class="sketch-cv" id="sketchCv"></canvas>
-      </div>
-      <div class="create-pane" id="cpNote">
-        <textarea class="notepad" id="notepad" placeholder="Type your note..."></textarea>
-        <div class="note-bar">
-          <span class="note-chars" id="noteChars">0 chars</span>
-          <button class="sk-btn sk-dl note-dl">↓ TXT</button>
-        </div>
-      </div>`;
-
-    // Sub-tab switching
-    createApp.querySelectorAll('.create-tab').forEach(b => {
-      b.addEventListener('click', () => {
-        createApp.querySelectorAll('.create-tab').forEach(x=>x.classList.remove('active'));
-        createApp.querySelectorAll('.create-pane').forEach(x=>x.classList.remove('active'));
-        b.classList.add('active');
-        createApp.querySelector('#cp'+b.dataset.ctab.charAt(0).toUpperCase()+b.dataset.ctab.slice(1)).classList.add('active');
-      });
-    });
-
-    // Pixel sketchpad
-    const skCv = createApp.querySelector('#sketchCv');
-    const skCtx = skCv.getContext('2d');
-    let drawing = false, mode = 'draw', penSz = 2;
-    function resizeSk() {
-      const pane = createApp.querySelector('#cpSketch');
-      const tb = createApp.querySelector('.sketch-toolbar');
-      const w = pane.clientWidth, h = pane.clientHeight - tb.offsetHeight;
-      const img = skCtx.getImageData(0,0,skCv.width,skCv.height);
-      skCv.width = w; skCv.height = h;
-      skCtx.fillStyle='#0a0a0a'; skCtx.fillRect(0,0,w,h);
-      skCtx.putImageData(img,0,0);
-    }
-    setTimeout(resizeSk, 20);
-    skCv.addEventListener('mousedown', e=>{drawing=true; skCtx.beginPath(); skCtx.moveTo(e.offsetX,e.offsetY);});
-    skCv.addEventListener('mousemove', e=>{
-      if(!drawing) return;
-      skCtx.lineWidth = penSz;
-      skCtx.lineCap = 'round';
-      skCtx.strokeStyle = mode==='eraser' ? '#0a0a0a' : getAccent();
-      skCtx.lineTo(e.offsetX,e.offsetY);
-      skCtx.stroke();
-      skCtx.beginPath(); skCtx.moveTo(e.offsetX,e.offsetY);
-    });
-    skCv.addEventListener('mouseup', ()=>drawing=false);
-    skCv.addEventListener('mouseleave', ()=>drawing=false);
-    // Touch
-    skCv.addEventListener('touchstart', e=>{e.preventDefault();drawing=true;const r=skCv.getBoundingClientRect(),t=e.touches[0];skCtx.beginPath();skCtx.moveTo(t.clientX-r.left,t.clientY-r.top);},{passive:false});
-    skCv.addEventListener('touchmove', e=>{e.preventDefault();if(!drawing)return;const r=skCv.getBoundingClientRect(),t=e.touches[0];skCtx.lineWidth=penSz;skCtx.lineCap='round';skCtx.strokeStyle=mode==='eraser'?'#0a0a0a':getAccent();skCtx.lineTo(t.clientX-r.left,t.clientY-r.top);skCtx.stroke();skCtx.beginPath();skCtx.moveTo(t.clientX-r.left,t.clientY-r.top);},{passive:false});
-    skCv.addEventListener('touchend', ()=>drawing=false);
-    createApp.querySelector('.sk-clear').addEventListener('click',()=>{skCtx.fillStyle='#0a0a0a';skCtx.fillRect(0,0,skCv.width,skCv.height);});
-    createApp.querySelector('.sk-eraser').addEventListener('click',e=>{mode='eraser';createApp.querySelector('.sk-draw').classList.remove('active');e.currentTarget.classList.add('active');});
-    createApp.querySelector('.sk-draw').addEventListener('click',e=>{mode='draw';createApp.querySelector('.sk-eraser').classList.remove('active');e.currentTarget.classList.add('active');});
-    createApp.querySelectorAll('.sk-sz').forEach(b=>b.addEventListener('click',e=>{createApp.querySelectorAll('.sk-sz').forEach(x=>x.classList.remove('active'));e.currentTarget.classList.add('active');penSz=+e.currentTarget.dataset.sz;}));
-    createApp.querySelector('.sk-dl').addEventListener('click',()=>{
-      const a=document.createElement('a'); a.href=skCv.toDataURL(); a.download='daniel-sheils-sketch.png'; a.click();
-    });
-
-    // Notepad
-    const notepad = createApp.querySelector('#notepad');
-    const noteChars = createApp.querySelector('#noteChars');
-    notepad.addEventListener('input',()=>noteChars.textContent=notepad.value.length+' chars');
-    createApp.querySelector('.note-dl').addEventListener('click',()=>{
-      const blob=new Blob([notepad.value],{type:'text/plain'});
-      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='daniel-sheils-note.txt'; a.click();
-    });
-  }
 
   /* ============================================================
      COMMUNITY TAB — GitHub Discussions via Giscus
@@ -1297,8 +1203,8 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   // Randomise the starting tab + game on every page load
   (function randomInit() {
     const GAMES = ['pong','snake','breakout','tetris','asteroids','flappy'];
-    // 10 total slots: 6 games + projects + terminal + create + community
-    const pick  = Math.floor(Math.random() * (GAMES.length + 4));
+    // 9 total slots: 6 games + projects + terminal + community
+    const pick  = Math.floor(Math.random() * (GAMES.length + 3));
     if (pick < GAMES.length) {
       activeGame = GAMES[pick];
       pongApp.querySelectorAll('.game-btn').forEach(b => {
@@ -1309,7 +1215,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
         switchTab('pong');
       }, 420);
     } else {
-      const extra = ['projects','terminal','create','community'][pick - GAMES.length];
+    const extra = ['projects','terminal','community'][pick - GAMES.length];
       setTimeout(() => {
         resizeGame(); initParticles(); tickParticles();
         switchTab(extra);
