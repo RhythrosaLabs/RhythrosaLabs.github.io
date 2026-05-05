@@ -855,12 +855,34 @@ nav {
   border-left: 3px solid transparent;
   min-height: 280px;
   overflow: hidden;
+  transition: background 0.35s;
 }
 
 .pcarousel-slide.active {
   display: block;
   border-left-color: var(--accent);
   animation: pslide-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pcarousel-slide.active:hover {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent) 7%, transparent) 0%,
+    transparent 55%
+  );
+}
+
+.pcarousel-slide.active:hover .pcarousel-title {
+  background-image: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 55%, #fff));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* reset when not hovered so color scheme changes don't stick in light mode */
+.pcarousel-slide:not(:hover) .pcarousel-title {
+  background-image: none;
+  -webkit-text-fill-color: inherit;
 }
 
 @keyframes pslide-in {
@@ -879,11 +901,12 @@ nav {
   color: var(--border);
   pointer-events: none;
   user-select: none;
-  transition: color 0.4s;
+  transition: color 0.4s, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .pcarousel-slide.active:hover .pcarousel-bg-num {
-  color: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: color-mix(in srgb, var(--accent) 28%, transparent);
+  transform: scale(1.04) translateY(-4px);
 }
 
 .pcarousel-slide-top {
