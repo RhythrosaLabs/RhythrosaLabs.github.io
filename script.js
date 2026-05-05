@@ -368,44 +368,88 @@ const labelScrambleObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.observe(el));
 
 /* ============================================================
-   PROJECTS — LIST / SLIDE VIEW TOGGLE + CAROUSEL
+   PROJECTS — LIST / GRID / SLIDE VIEW TOGGLE + CAROUSEL
    ============================================================ */
 (function () {
-  const list     = document.querySelector('.projects-list');
-  const carousel = document.getElementById('projectsCarousel');
-  const track    = document.getElementById('pcarouselTrack');
-  const dotsWrap = document.getElementById('pcarDots');
-  const counter  = document.getElementById('pcarCounter');
-  const prevBtn  = document.getElementById('pcarPrev');
-  const nextBtn  = document.getElementById('pcarNext');
-  const btnList  = document.getElementById('viewList');
-  const btnSlide = document.getElementById('viewSlide');
+  const list        = document.querySelector('.projects-list');
+  const carousel    = document.getElementById('projectsCarousel');
+  const grid        = document.getElementById('projectsGrid');
+  const track       = document.getElementById('pcarouselTrack');
+  const dotsWrap    = document.getElementById('pcarDots');
+  const counter     = document.getElementById('pcarCounter');
+  const prevBtn     = document.getElementById('pcarPrev');
+  const nextBtn     = document.getElementById('pcarNext');
+  const progressBar = document.getElementById('pcarProgressBar');
+  const btnList     = document.getElementById('viewList');
+  const btnGrid     = document.getElementById('viewGrid');
+  const btnSlide    = document.getElementById('viewSlide');
   if (!list || !carousel || !btnList || !btnSlide) return;
 
   const items = document.querySelectorAll('.project-item');
   const total = items.length;
   let current = 0;
+  let autoTimer = null;
+  let progressAnim = null;
+  const AUTO_MS = 5000;
 
-  // Build slides from existing project-item markup
+  // Map tags → category label
+  function categoryFrom(tags) {
+    const t = tags.map(x => x.toLowerCase()).join(' ');
+    if (t.includes('music video') || t.includes('cinematic') || t.includes('experimental')) return 'FILM · VISUAL';
+    if (t.includes('unity') || t.includes('game'))   return 'GAME DEV';
+    if (t.includes('ar') || t.includes('xr'))        return 'AR / XR';
+    if (t.includes('audio') || t.includes('sound'))  return 'AUDIO TECH';
+    if (t.includes('typescript') || t.includes('react')) return 'WEB · FRONTEND';
+    if (t.includes('python') || t.includes('fastapi')) return 'BACKEND · AI';
+    if (t.includes('ai') || t.includes('agent') || t.includes('automation')) return 'AI · AUTOMATION';
+    return 'PROJECT';
+  }
+
+  // Map tags → a short stat pair
+  function statFrom(tags, idx) {
+    const t = tags.map(x => x.toLowerCase()).join(' ');
+    const year = tags.find(x => /^\d{4}$/.test(x));
+    const stats = [];
+    if (year) stats.push({ label: 'YEAR', value: year });
+    if (t.includes('190+') || t.includes('200+')) stats.push({ label: 'CONNECTORS', value: '190+' });
+    if (t.includes('streamlit')) stats.push({ label: 'PLATFORM', value: 'Streamlit' });
+    if (t.includes('unity'))     stats.push({ label: 'ENGINE', value: 'Unity' });
+    if (t.includes('react'))     stats.push({ label: 'FRAMEWORK', value: 'React 19' });
+    if (t.includes('fastapi'))   stats.push({ label: 'BACKEND', value: 'FastAPI' });
+    if (stats.length === 0)      stats.push({ label: 'INDEX', value: String(idx + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0') });
+    return stats.slice(0, 3);
+  }
+
+  // Build slides
   items.forEach((item, idx) => {
     const num   = item.querySelector('.project-num')?.textContent.trim() || '';
     const tags  = [...item.querySelectorAll('.project-tags-inline span')].map(s => s.textContent.trim());
     const title = item.querySelector('.project-content h3')?.textContent.trim() || '';
     const desc  = item.querySelector('.project-content p')?.innerHTML.trim() || '';
     const links = [...item.querySelectorAll('.project-links a')].map(a => ({
-      href: a.getAttribute('href'),
-      text: a.textContent.trim()
+      href: a.getAttribute('href'), text: a.textContent.trim()
     }));
+    const cat   = categoryFrom(tags);
+    const stats = statFrom(tags, idx);
 
     const slide = document.createElement('div');
     slide.className = 'pcarousel-slide' + (idx === 0 ? ' active' : '');
     slide.innerHTML =
+      '<div class="pcarousel-category">' + cat + '</div>' +
       '<div class="pcarousel-slide-top">' +
         '<span class="pcarousel-num">' + num + '</span>' +
         '<div class="pcarousel-tags">' + tags.map(t => '<span>' + t + '</span>').join('') + '</div>' +
       '</div>' +
       '<div class="pcarousel-bg-num">' + num + '</div>' +
       '<h3 class="pcarousel-title">' + title + '</h3>' +
+      '<div class="pcarousel-stat-row">' +
+        stats.map(s =>
+          '<div class="pcarousel-stat">' +
+            '<span class="pcarousel-stat-label">' + s.label + '</span>' +
+            '<span class="pcarousel-stat-value">' + s.value + '</span>' +
+          '</div>'
+        ).join('') +
+      '</div>' +
       '<p class="pcarousel-desc">' + desc + '</p>' +
       '<div class="pcarousel-links">' +
         links.map(l => '<a href="' + l.href + '" target="_blank">' + l.text + '</a>').join('') +
@@ -415,8 +459,21 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     // Dot
     const dot = document.createElement('button');
     dot.className = 'pcarousel-dot' + (idx === 0 ? ' active' : '');
-    dot.addEventListener('click', () => goTo(idx));
+    dot.addEventListener('click', () => { goTo(idx); resetAuto(); });
     dotsWrap.appendChild(dot);
+
+    // Grid card
+    if (grid) {
+      const card = document.createElement('div');
+      card.className = 'pgrid-item';
+      card.innerHTML =
+        '<div class="pgrid-num">' + num + '</div>' +
+        '<div class="pgrid-title">' + title + '</div>' +
+        '<p class="pgrid-desc">' + item.querySelector('.project-content p')?.textContent.trim() + '</p>' +
+        '<div class="pgrid-tags">' + tags.map(t => '<span>' + t + '</span>').join('') + '</div>' +
+        (links.length ? '<a href="' + links[0].href + '" target="_blank" class="pgrid-link">' + links[0].text + '</a>' : '');
+      grid.appendChild(card);
+    }
   });
 
   function updateCounter() {
@@ -435,36 +492,84 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     updateCounter();
   }
 
-  prevBtn.addEventListener('click', () => goTo(current - 1));
-  nextBtn.addEventListener('click', () => goTo(current + 1));
+  // Auto-advance with animated progress bar
+  function startProgress() {
+    if (!progressBar) return;
+    if (progressAnim) cancelAnimationFrame(progressAnim);
+    progressBar.style.transition = 'none';
+    progressBar.style.width = '0%';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        progressBar.style.transition = 'width ' + AUTO_MS + 'ms linear';
+        progressBar.style.width = '100%';
+      });
+    });
+  }
+
+  function startAuto() {
+    stopAuto();
+    startProgress();
+    autoTimer = setTimeout(() => {
+      goTo(current + 1);
+      startAuto();
+    }, AUTO_MS);
+  }
+
+  function stopAuto() {
+    clearTimeout(autoTimer);
+    autoTimer = null;
+    if (progressBar) {
+      progressBar.style.transition = 'none';
+      progressBar.style.width = '0%';
+    }
+  }
+
+  function resetAuto() {
+    if (autoTimer !== null) startAuto(); // only restart if it was running
+  }
+
+  prevBtn.addEventListener('click', () => { goTo(current - 1); resetAuto(); });
+  nextBtn.addEventListener('click', () => { goTo(current + 1); resetAuto(); });
+
+  // Pause on hover
+  carousel.addEventListener('mouseenter', stopAuto);
+  carousel.addEventListener('mouseleave', () => { if (carousel.classList.contains('active')) startAuto(); });
 
   document.addEventListener('keydown', (e) => {
     if (!carousel.classList.contains('active')) return;
-    if (e.key === 'ArrowLeft')  goTo(current - 1);
-    if (e.key === 'ArrowRight') goTo(current + 1);
+    if (e.key === 'ArrowLeft')  { goTo(current - 1); resetAuto(); }
+    if (e.key === 'ArrowRight') { goTo(current + 1); resetAuto(); }
   });
 
   function setView(mode) {
+    // Hide all
+    list.style.display = 'none';
+    carousel.classList.remove('active');
+    if (grid) grid.classList.remove('active');
+    stopAuto();
+
+    [btnList, btnGrid, btnSlide].forEach(b => b && b.classList.remove('active'));
+
     if (mode === 'list') {
       list.style.display = '';
-      // ensure all items are visible when returning to list
       document.querySelectorAll('.project-item').forEach(el => {
-        el.style.opacity   = '1';
+        el.style.opacity = '1';
         el.style.transform = 'translateY(0)';
       });
-      carousel.classList.remove('active');
       btnList.classList.add('active');
-      btnSlide.classList.remove('active');
+    } else if (mode === 'grid') {
+      if (grid) grid.classList.add('active');
+      if (btnGrid) btnGrid.classList.add('active');
     } else {
-      list.style.display = 'none';
       carousel.classList.add('active');
-      btnList.classList.remove('active');
       btnSlide.classList.add('active');
+      startAuto();
     }
     localStorage.setItem('ds-proj-view', mode);
   }
 
   btnList.addEventListener('click',  () => setView('list'));
+  if (btnGrid) btnGrid.addEventListener('click', () => setView('grid'));
   btnSlide.addEventListener('click', () => setView('slide'));
 
   updateCounter();

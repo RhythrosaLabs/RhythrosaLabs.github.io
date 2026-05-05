@@ -1017,6 +1017,182 @@ nav {
   text-align: right;
 }
 
+/* Auto-advance progress bar */
+.pcarousel-progress {
+  height: 2px;
+  background: var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.pcarousel-progress-bar {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width linear;
+  transform-origin: left;
+}
+
+/* Slide category badge + stat row */
+.pcarousel-category {
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.6;
+  margin-bottom: 0.6rem;
+}
+
+.pcarousel-stat-row {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.6rem;
+  flex-wrap: wrap;
+}
+
+.pcarousel-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.pcarousel-stat-label {
+  font-family: var(--mono);
+  font-size: 0.48rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.pcarousel-stat-value {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+
+/* ============================================================
+   PROJECTS GRID
+   ============================================================ */
+.projects-grid {
+  display: none;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 2.5rem;
+}
+
+.projects-grid.active {
+  display: grid;
+}
+
+.pgrid-item {
+  background: var(--bg);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.25s;
+  cursor: default;
+}
+
+.pgrid-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 12%, transparent) 0%,
+    transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.pgrid-item:hover::before { opacity: 1; }
+.pgrid-item:hover { background: var(--bg2); }
+
+.pgrid-num {
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  margin-bottom: 0.9rem;
+}
+
+.pgrid-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.6rem;
+  line-height: 1.25;
+  transition: color 0.2s;
+}
+
+.pgrid-item:hover .pgrid-title { color: var(--accent); }
+
+.pgrid-desc {
+  font-size: 0.82rem;
+  color: #777;
+  line-height: 1.65;
+  margin-bottom: 1rem;
+}
+
+.pgrid-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.pgrid-tags span {
+  font-family: var(--mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 0.15rem 0.45rem;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.pgrid-item:hover .pgrid-tags span {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.pgrid-link {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  transition: opacity 0.2s;
+}
+
+.pgrid-link:hover { opacity: 0.65; }
+
+/* corner accent bar */
+.pgrid-item::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pgrid-item:hover::after { transform: scaleY(1); }
+
+[data-light="1"] .pgrid-title { color: var(--text); }
+[data-light="1"] .pgrid-desc  { color: var(--muted); }
+[data-light="1"] .pgrid-item  { background: var(--bg); }
+[data-light="1"] .pgrid-item:hover { background: var(--surface); }
+[data-light="1"] .projects-grid { background: var(--border); }
+
 /* ============================================================
    TIMELINE
    ============================================================ */
