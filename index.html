@@ -176,8 +176,16 @@
 
   <!-- Projects -->
   <section class="section" id="projects">
-    <div class="section-label" data-original="03 · PROJECTS">03 · PROJECTS</div>
-    <h2 class="section-title">Selected Work</h2>
+    <div class="projects-header">
+      <div>
+        <div class="section-label" data-original="03 · PROJECTS">03 · PROJECTS</div>
+        <h2 class="section-title">Selected Work</h2>
+      </div>
+      <div class="pview-btns">
+        <button class="pview-btn active" id="viewList" title="List view">LIST</button>
+        <button class="pview-btn" id="viewSlide" title="Slide view">SLIDE</button>
+      </div>
+    </div>
     <div class="projects-list">
 
       <div class="project-item" data-index="01">
@@ -435,6 +443,15 @@
         <div class="project-bar"></div>
       </div>
 
+    </div>
+    <div class="projects-carousel" id="projectsCarousel">
+      <div class="pcarousel-track" id="pcarouselTrack"></div>
+      <div class="pcarousel-nav">
+        <button class="pcarousel-arrow" id="pcarPrev">← PREV</button>
+        <div class="pcarousel-dots" id="pcarDots"></div>
+        <span class="pcarousel-counter" id="pcarCounter">01 / 15</span>
+        <button class="pcarousel-arrow" id="pcarNext">NEXT →</button>
+      </div>
     </div>
     <div class="projects-more">
       <a href="https://www.linkedin.com/in/danielsheils" target="_blank" class="btn-ghost">LinkedIn ↗</a>

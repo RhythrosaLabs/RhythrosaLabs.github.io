@@ -368,6 +368,110 @@ const labelScrambleObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.observe(el));
 
 /* ============================================================
+   PROJECTS — LIST / SLIDE VIEW TOGGLE + CAROUSEL
+   ============================================================ */
+(function () {
+  const list     = document.querySelector('.projects-list');
+  const carousel = document.getElementById('projectsCarousel');
+  const track    = document.getElementById('pcarouselTrack');
+  const dotsWrap = document.getElementById('pcarDots');
+  const counter  = document.getElementById('pcarCounter');
+  const prevBtn  = document.getElementById('pcarPrev');
+  const nextBtn  = document.getElementById('pcarNext');
+  const btnList  = document.getElementById('viewList');
+  const btnSlide = document.getElementById('viewSlide');
+  if (!list || !carousel || !btnList || !btnSlide) return;
+
+  const items = document.querySelectorAll('.project-item');
+  const total = items.length;
+  let current = 0;
+
+  // Build slides from existing project-item markup
+  items.forEach((item, idx) => {
+    const num   = item.querySelector('.project-num')?.textContent.trim() || '';
+    const tags  = [...item.querySelectorAll('.project-tags-inline span')].map(s => s.textContent.trim());
+    const title = item.querySelector('.project-content h3')?.textContent.trim() || '';
+    const desc  = item.querySelector('.project-content p')?.innerHTML.trim() || '';
+    const links = [...item.querySelectorAll('.project-links a')].map(a => ({
+      href: a.getAttribute('href'),
+      text: a.textContent.trim()
+    }));
+
+    const slide = document.createElement('div');
+    slide.className = 'pcarousel-slide' + (idx === 0 ? ' active' : '');
+    slide.innerHTML =
+      '<div class="pcarousel-slide-top">' +
+        '<span class="pcarousel-num">' + num + '</span>' +
+        '<div class="pcarousel-tags">' + tags.map(t => '<span>' + t + '</span>').join('') + '</div>' +
+      '</div>' +
+      '<div class="pcarousel-bg-num">' + num + '</div>' +
+      '<h3 class="pcarousel-title">' + title + '</h3>' +
+      '<p class="pcarousel-desc">' + desc + '</p>' +
+      '<div class="pcarousel-links">' +
+        links.map(l => '<a href="' + l.href + '" target="_blank">' + l.text + '</a>').join('') +
+      '</div>';
+    track.appendChild(slide);
+
+    // Dot
+    const dot = document.createElement('button');
+    dot.className = 'pcarousel-dot' + (idx === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(idx));
+    dotsWrap.appendChild(dot);
+  });
+
+  function updateCounter() {
+    counter.textContent =
+      String(current + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+  }
+
+  function goTo(idx) {
+    const slides = track.querySelectorAll('.pcarousel-slide');
+    const dots   = dotsWrap.querySelectorAll('.pcarousel-dot');
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = ((idx % total) + total) % total;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+    updateCounter();
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current - 1));
+  nextBtn.addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', (e) => {
+    if (!carousel.classList.contains('active')) return;
+    if (e.key === 'ArrowLeft')  goTo(current - 1);
+    if (e.key === 'ArrowRight') goTo(current + 1);
+  });
+
+  function setView(mode) {
+    if (mode === 'list') {
+      list.style.display = '';
+      // ensure all items are visible when returning to list
+      document.querySelectorAll('.project-item').forEach(el => {
+        el.style.opacity   = '1';
+        el.style.transform = 'translateY(0)';
+      });
+      carousel.classList.remove('active');
+      btnList.classList.add('active');
+      btnSlide.classList.remove('active');
+    } else {
+      list.style.display = 'none';
+      carousel.classList.add('active');
+      btnList.classList.remove('active');
+      btnSlide.classList.add('active');
+    }
+    localStorage.setItem('ds-proj-view', mode);
+  }
+
+  btnList.addEventListener('click',  () => setView('list'));
+  btnSlide.addEventListener('click', () => setView('slide'));
+
+  updateCounter();
+  setView(localStorage.getItem('ds-proj-view') || 'list');
+}());
+
+/* ============================================================
    HERO PANEL WIDGET — Terminal only
    ============================================================ */
 (function () {
