@@ -19,9 +19,11 @@ document.addEventListener('mouseup',   () => cursor.style.transform = 'translate
    THEME SWITCHER
    ============================================================ */
 (function () {
-  const root   = document.documentElement;
-  const dots   = document.querySelectorAll('.theme-dot');
-  const saved  = localStorage.getItem('ds-theme') || 'default';
+  const root        = document.documentElement;
+  const dots        = document.querySelectorAll('.theme-dot');
+  const lightToggle = document.getElementById('lightToggle');
+  const savedTheme  = localStorage.getItem('ds-theme') || 'default';
+  const savedLight  = localStorage.getItem('ds-light') === '1';
 
   function applyTheme(theme) {
     root.setAttribute('data-theme', theme === 'default' ? '' : theme);
@@ -29,8 +31,21 @@ document.addEventListener('mouseup',   () => cursor.style.transform = 'translate
     localStorage.setItem('ds-theme', theme);
   }
 
-  applyTheme(saved);
+  function applyLight(on) {
+    root.setAttribute('data-light', on ? '1' : '0');
+    lightToggle.classList.toggle('active', on);
+    lightToggle.title = on ? 'Switch to dark mode' : 'Switch to light mode';
+    lightToggle.textContent = on ? '☾' : '☀';
+    localStorage.setItem('ds-light', on ? '1' : '0');
+  }
+
+  applyTheme(savedTheme);
+  applyLight(savedLight);
+
   dots.forEach(d => d.addEventListener('click', () => applyTheme(d.dataset.theme)));
+  lightToggle.addEventListener('click', () => {
+    applyLight(root.getAttribute('data-light') !== '1');
+  });
 }());
 
 /* ============================================================

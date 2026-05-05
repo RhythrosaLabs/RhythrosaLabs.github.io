@@ -19,6 +19,10 @@
   --muted:       #555;
   --mono:        'Space Mono', monospace;
   --sans:        'Space Grotesk', sans-serif;
+  /* nav/overlay rgba backgrounds */
+  --nav-bg:      rgba(8,8,8,0.80);
+  --switcher-bg: rgba(8,8,8,0.72);
+  --overlay-bg:  rgba(8,8,8,0.85);
 }
 
 [data-theme="plasma"] {
@@ -42,6 +46,48 @@
   --accent-glow: rgba(255,45,120,0.07);
 }
 
+/* ── LIGHT MODE ── */
+[data-light="1"] {
+  --bg:          #f4f4f2;
+  --bg2:         #ebebea;
+  --surface:     #e4e4e1;
+  --border:      #ccccc8;
+  --text:        #111111;
+  --muted:       #888880;
+  --nav-bg:      rgba(244,244,242,0.88);
+  --switcher-bg: rgba(244,244,242,0.88);
+  --overlay-bg:  rgba(244,244,242,0.90);
+}
+/* In light mode, accent colors are a touch darker for contrast */
+[data-light="1"] { filter: none; }
+[data-light="1"][data-theme=""] ,
+[data-light="1"]:not([data-theme]),
+[data-light="1"][data-theme="default"] {
+  --accent:      #7ab800;
+  --accent2:     #689f00;
+  --accent-glow: rgba(122,184,0,0.10);
+}
+[data-light="1"][data-theme="plasma"] {
+  --accent:      #0099bb;
+  --accent2:     #007a99;
+  --accent-glow: rgba(0,153,187,0.10);
+}
+[data-light="1"][data-theme="ember"] {
+  --accent:      #d94f15;
+  --accent2:     #b83d0d;
+  --accent-glow: rgba(217,79,21,0.10);
+}
+[data-light="1"][data-theme="violet"] {
+  --accent:      #7c3aed;
+  --accent2:     #6620d4;
+  --accent-glow: rgba(124,58,237,0.10);
+}
+[data-light="1"][data-theme="rose"] {
+  --accent:      #d4004f;
+  --accent2:     #aa003d;
+  --accent-glow: rgba(212,0,79,0.10);
+}
+
 /* ============================================================
    THEME SWITCHER
    ============================================================ */
@@ -53,11 +99,12 @@
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  background: rgba(8,8,8,0.72);
+  background: var(--switcher-bg);
   backdrop-filter: blur(10px);
   border: 1px solid var(--border);
   border-radius: 2px;
   padding: 0.45rem 0.75rem;
+  transition: background 0.3s, border-color 0.3s;
 }
 
 .theme-switcher-label {
@@ -68,6 +115,26 @@
   margin-right: 0.2rem;
   text-transform: uppercase;
 }
+
+.theme-light-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  cursor: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  padding: 0;
+  margin-left: 0.15rem;
+  transition: color 0.2s, border-color 0.2s;
+  line-height: 1;
+}
+.theme-light-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.theme-light-toggle.active { color: var(--accent); border-color: var(--accent); }
 
 .theme-dot {
   width: 11px;
@@ -176,10 +243,10 @@ nav {
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem 3rem;
-  background: rgba(8,8,8,0.8);
+  background: var(--nav-bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
-  transition: background 0.3s;
+  transition: background 0.3s, border-color 0.3s;
 }
 
 .nav-logo {
@@ -1580,6 +1647,46 @@ footer {
 .comm-soon { color:var(--accent); letter-spacing:0.15em; }
 .comm-link { color:var(--accent); text-decoration:underline; }
 /* ==== PANEL END ==== */
+
+/* ============================================================
+   LIGHT MODE OVERRIDES — fix hardcoded dark values
+   ============================================================ */
+[data-light="1"] body {
+  background: var(--bg);
+  color: var(--text);
+}
+[data-light="1"] strong { color: var(--text); }
+[data-light="1"] .hero-sub { color: var(--muted); }
+[data-light="1"] .btn-ghost { color: var(--muted); }
+[data-light="1"] .btn-primary { color: var(--bg); }
+[data-light="1"] .skill-block:hover { background: var(--bg); }
+[data-light="1"] .noise { opacity: 0.012; }
+[data-light="1"] .bg-grid {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--accent) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--accent) 8%, transparent) 1px, transparent 1px);
+}
+/* Panel terminal */
+[data-light="1"] .term-cmd { color: var(--accent); }
+[data-light="1"] .term-out { color: var(--muted); }
+/* section-title shimmer: darker mid-stop in light mode */
+[data-light="1"] .section-title .accent {
+  background: linear-gradient(90deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 60%, #000) 45%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+/* scroll-progress bar */
+[data-light="1"] #scroll-progress { background: var(--accent); }
+/* project items */
+[data-light="1"] .project-item { border-color: var(--border); }
+[data-light="1"] .project-bar { background: var(--border); }
+[data-light="1"] .project-bar::after { background: var(--accent); }
+/* footer */
+[data-light="1"] footer { background: var(--bg2); border-color: var(--border); }
+[data-light="1"] .footer-built { color: var(--accent); }
+/* cursor */
+[data-light="1"] .cursor { mix-blend-mode: normal; background: var(--accent); }
 
 /* ============================================================
    RESPONSIVE
