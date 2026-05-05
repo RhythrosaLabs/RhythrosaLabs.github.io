@@ -1045,11 +1045,21 @@ nav {
 }
 
 .timeline-item:hover {
-  background: var(--accent-glow);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 14%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 5%, transparent) 35%,
+    transparent 100%
+  );
 }
 
 .timeline-item:active {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 22%, transparent) 0%,
+    color-mix(in srgb, var(--accent) 8%, transparent) 40%,
+    transparent 100%
+  );
 }
 
 .timeline-item::after {
