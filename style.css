@@ -1576,6 +1576,7 @@ footer {
   border:1px solid var(--border); border-radius:2px;
   font-family:var(--mono); font-size:0.58rem; color:var(--muted);
 }
+.comm-soon { color:var(--accent); letter-spacing:0.15em; }
 .comm-link { color:var(--accent); text-decoration:underline; }
 /* ==== PANEL END ==== */
 

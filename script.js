@@ -486,31 +486,14 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
           <span class="comm-icon">◎</span>
           <span class="comm-title">COMMUNITY</span>
         </div>
-        <p class="comm-desc">Join the conversation. Requires a free GitHub account — keeps it genuine.</p>
-        <div id="giscusContainer"></div>
-        <div class="comm-setup" id="commSetup">
-          <span>⚠ Enable GitHub Discussions to activate</span>
-          <a href="https://github.com/RhythrosaLabs/RhythrosaLabs.github.io/settings" target="_blank" class="comm-link">Open repo settings ↗</a>
+        <p class="comm-desc">A space for questions, collabs, and conversation — powered by GitHub Discussions.</p>
+        <p class="comm-desc">Requires a free GitHub account. No spam, no bots.</p>
+        <div class="comm-setup">
+          <span class="comm-soon">⬡ Coming soon</span>
+          <span>Once live, sign in with GitHub to join the thread.</span>
+          <a href="https://github.com/RhythrosaLabs/RhythrosaLabs.github.io/discussions" target="_blank" class="comm-link">github.com/RhythrosaLabs ↗</a>
         </div>
       </div>`;
-    // Inject giscus once Discussions is enabled — swap in real data-repo-id & data-category-id
-    const s = document.createElement('script');
-    s.src = 'https://giscus.app/client.js';
-    s.setAttribute('data-repo', 'RhythrosaLabs/RhythrosaLabs.github.io');
-    s.setAttribute('data-repo-id', 'R_kgDOSQa85w');
-    s.setAttribute('data-category', 'General');
-    s.setAttribute('data-category-id', ''); // fill after Discussions enabled
-    s.setAttribute('data-mapping', 'pathname');
-    s.setAttribute('data-reactions-enabled', '1');
-    s.setAttribute('data-emit-metadata', '0');
-    s.setAttribute('data-input-position', 'top');
-    s.setAttribute('data-theme', 'dark');
-    s.setAttribute('data-lang', 'en');
-    s.setAttribute('data-loading', 'lazy');
-    s.crossOrigin = 'anonymous';
-    s.async = true;
-    s.onload = () => { const el = document.getElementById('commSetup'); if(el) el.style.display='none'; };
-    document.getElementById('giscusContainer').appendChild(s);
   }
 
   /* ============================================================
