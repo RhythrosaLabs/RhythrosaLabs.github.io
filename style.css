@@ -1314,18 +1314,19 @@ footer {
 
 .game-btn {
   font-family: var(--mono);
-  font-size: 0.45rem;
-  letter-spacing: 0.06em;
+  font-size: 0.4rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
   background: none;
   border: none;
   border-right: 1px solid var(--border);
-  padding: 0.5rem 0.3rem;
+  padding: 0.45rem 0.15rem;
   cursor: none;
   transition: color 0.18s;
   white-space: nowrap;
   flex: 1;
+  text-align: center;
   position: relative;
 }
 
