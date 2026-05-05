@@ -853,7 +853,7 @@ nav {
   padding: 3.5rem 4rem 2.5rem;
   position: relative;
   border-left: 3px solid transparent;
-  min-height: 280px;
+  height: 340px;
   overflow: hidden;
   transition: background 0.35s;
 }
@@ -956,9 +956,14 @@ nav {
   color: #777;
   line-height: 1.8;
   max-width: 700px;
-  margin-bottom: 1.75rem;
+  margin-bottom: 1.25rem;
   position: relative;
   z-index: 1;
+  /* clamp to 2 lines so long descriptions don't blow out the fixed height */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .pcarousel-links {

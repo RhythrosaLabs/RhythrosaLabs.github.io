@@ -392,6 +392,25 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   let progressAnim = null;
   const AUTO_MS = 5000;
 
+  // Per-project stat data (title → array of {label, value})
+  const PROJECT_STATS = {
+    'Ottomate':                         [{ label: 'TYPE', value: 'AI Workbench' },    { label: 'CONNECTORS', value: '190+' },     { label: 'SKILLS', value: '200+' }],
+    'brAInstormer':                     [{ label: 'TYPE', value: 'AI Suite' },        { label: 'PLATFORM', value: 'Streamlit' },  { label: 'BUILT IN', value: '< 2 weeks' }],
+    'Trinkets — Interactive Portfolio': [{ label: 'TYPE', value: 'Interactive Art' }, { label: 'ENGINE', value: 'Unity' },        { label: 'FORMAT', value: '3D Museum' }],
+    'Game Maker':                       [{ label: 'TYPE', value: 'Dev Tool' },        { label: 'PLATFORM', value: 'Streamlit' },  { label: 'AI MODELS', value: '4' }],
+    'Prism Rider':                      [{ label: 'TYPE', value: 'Indie Game' },      { label: 'ENGINE', value: 'Unity' },        { label: 'GENRE', value: 'Rhythm Kart' }],
+    'AR/XR Sound Design — Rock Paper Reality': [{ label: 'TYPE', value: 'Enterprise XR' }, { label: 'CLIENTS', value: '8+' },      { label: 'FORMAT', value: 'AR / XR' }],
+    'Mend — Music Video':               [{ label: 'TYPE', value: 'Music Video' },     { label: 'TECHNIQUE', value: 'AI Animation' }, { label: 'YEAR', value: '2022' }],
+    'Soundstorm':                       [{ label: 'TYPE', value: 'Audio Tool' },      { label: 'PLATFORM', value: 'Streamlit' },  { label: 'GENRE', value: 'Experimental' }],
+    'DuoGPT':                           [{ label: 'TYPE', value: 'AI Experiment' },   { label: 'MODEL', value: 'GPT-4' },         { label: 'FORMAT', value: 'AI-to-AI' }],
+    'LabelFlow':                        [{ label: 'TYPE', value: 'Web App' },         { label: 'FRAMEWORK', value: 'React 19' },  { label: 'MODULES', value: '15' }],
+    'Autonomous Business Platform':     [{ label: 'TYPE', value: 'Automation' },      { label: 'BACKEND', value: 'FastAPI' },     { label: 'STACK', value: 'Ray + Streamlit' }],
+    'Multi-Agent Viral Video Maker':    [{ label: 'TYPE', value: 'Video Pipeline' }, { label: 'AGENTS', value: 'Multi-Agent' },  { label: 'OUTPUT', value: 'HD + Audio' }],
+    'AI Blog Writer':                   [{ label: 'TYPE', value: 'Web App' },         { label: 'PLATFORM', value: 'Streamlit' },  { label: 'FORMAT', value: 'Browser-based' }],
+    'Streamlit Components':             [{ label: 'TYPE', value: 'Component Lib' },  { label: 'COMPONENTS', value: '6' },        { label: 'FRAMEWORK', value: 'Streamlit' }],
+    'The Raven — Music Video':          [{ label: 'TYPE', value: 'Music Video' },     { label: 'TECHNIQUE', value: 'SD Interp.' }, { label: 'YEAR', value: '2022' }],
+  };
+
   // Map tags → category label
   function categoryFrom(tags) {
     const t = tags.map(x => x.toLowerCase()).join(' ');
@@ -405,21 +424,6 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     return 'PROJECT';
   }
 
-  // Map tags → a short stat pair
-  function statFrom(tags, idx) {
-    const t = tags.map(x => x.toLowerCase()).join(' ');
-    const year = tags.find(x => /^\d{4}$/.test(x));
-    const stats = [];
-    if (year) stats.push({ label: 'YEAR', value: year });
-    if (t.includes('190+') || t.includes('200+')) stats.push({ label: 'CONNECTORS', value: '190+' });
-    if (t.includes('streamlit')) stats.push({ label: 'PLATFORM', value: 'Streamlit' });
-    if (t.includes('unity'))     stats.push({ label: 'ENGINE', value: 'Unity' });
-    if (t.includes('react'))     stats.push({ label: 'FRAMEWORK', value: 'React 19' });
-    if (t.includes('fastapi'))   stats.push({ label: 'BACKEND', value: 'FastAPI' });
-    if (stats.length === 0)      stats.push({ label: 'INDEX', value: String(idx + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0') });
-    return stats.slice(0, 3);
-  }
-
   // Build slides
   items.forEach((item, idx) => {
     const num   = item.querySelector('.project-num')?.textContent.trim() || '';
@@ -430,7 +434,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
       href: a.getAttribute('href'), text: a.textContent.trim()
     }));
     const cat   = categoryFrom(tags);
-    const stats = statFrom(tags, idx);
+    const stats = (PROJECT_STATS[title] || [{ label: 'TYPE', value: 'Project' }]).slice(0, 3);
 
     const slide = document.createElement('div');
     slide.className = 'pcarousel-slide' + (idx === 0 ? ' active' : '');
