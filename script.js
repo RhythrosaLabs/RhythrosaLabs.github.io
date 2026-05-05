@@ -1077,55 +1077,64 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     {
       icon: '◉', iconLabel: 'AI · AGENT',
       title: 'Ottomate', tags: ['TypeScript','AI Agent','Automation'],
+      role: 'Creator & Lead Dev', year: '2026',
       desc: 'Universal AI agent workbench. Goal → plan → code → deliver. 190+ connectors, 200+ skills.',
       href: 'https://github.com/RhythrosaLabs/otto-mate-2'
     },
     {
       icon: '⬡', iconLabel: 'AI · CREATIVE',
       title: 'brAInstormer', tags: ['AI','Python','Streamlit'],
+      role: 'Creator & Lead Dev', year: '2023',
       desc: 'All-in-one AI creative suite. Generate images, video, audio & full marketing plans in one interface.',
       href: 'https://github.com/RhythrosaLabs'
     },
     {
       icon: '◈', iconLabel: 'UNITY · 3D',
       title: 'Trinkets', tags: ['Unity','3D','Interactive'],
+      role: 'Designer, Developer & Composer', year: '2023',
       desc: 'A virtual museum. Explore original sound design, art & animations in 3D. Headphones recommended.',
       href: 'https://noodlebake.itch.io/trinkets'
     },
     {
       icon: '♦', iconLabel: 'MUSIC · VIDEO',
       title: 'Mend — Music Video', tags: ['Music Video','AI Animation','2022'],
-      desc: 'Directed & produced by Daniel Sheils. Music by Sidestep Complex. Early AI animation captured frame by frame.',
+      role: 'Director, Editor & Producer', year: '2022',
+      desc: 'Music by Sidestep Complex. Early AI animation captured frame by frame.',
       href: 'https://www.youtube.com/watch?v=1-IJfLo25s4'
     },
     {
       icon: '▲', iconLabel: 'STREAMLIT CREATOR',
       title: 'Streamlit Creator', tags: ['Python','Streamlit','AI Tools'],
+      role: 'Official Creator (Streamlit)', year: '2025–ongoing',
       desc: 'Official Streamlit Creator — autonomous AI tools for music generation, game design, and video production.',
       href: 'https://github.com/RhythrosaLabs/streamlit-components-demo'
     },
     {
       icon: '◎', iconLabel: 'RECORD LABEL',
       title: 'Noodlebake Records', tags: ['Music','Label','Indie'],
+      role: 'Founder & A&R', year: '2020–ongoing',
       desc: 'Independent record label founded by Daniel Sheils. Releases spanning electronic, ambient, and experimental.',
       href: 'https://noodlebake.itch.io'
     },
     {
       icon: '⬖', iconLabel: 'AI · CHAT',
       title: 'DuoGPT', tags: ['AI','Python','Chat'],
+      role: 'Creator & Lead Dev', year: '2024',
       desc: 'Two AI models debate, riff, and collaborate in real time. Emergent creativity from machine dialogue.',
       href: 'https://github.com/RhythrosaLabs'
     },
     {
       icon: '◭', iconLabel: 'GAME · AR',
       title: 'Prism Rider', tags: ['Unity','AR','Game'],
+      role: 'Designer, Developer & Composer', year: '2024',
       desc: 'Augmented reality rhythm game. Ride light beams, dodge obstacles, and sync to original audio.',
       href: 'https://noodlebake.itch.io'
     },
     {
       icon: '⊞', iconLabel: 'MUSIC · VIDEO',
-      title: 'The Raven — Music Video', tags: ['Music Video','Directed','2023'],
-      desc: 'Director, editor & composer. Visual narrative built entirely from generative and found footage.',
+      title: 'The Raven — Music Video', tags: ['Music Video','Directed','2022'],
+      role: 'Director, Editor & Composer', year: '2022',
+      desc: 'Visual narrative built entirely from generative and found footage.',
       href: 'https://www.youtube.com/@danielsheils'
     },
   ];
@@ -1145,6 +1154,7 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
         </div>
         <div class="proj-body">
           <h3 class="proj-title">${p.title}</h3>
+          <div class="proj-meta"><span class="proj-role">${p.role}</span><span class="proj-year">${p.year}</span></div>
           <p class="proj-desc">${p.desc}</p>
           <div class="proj-tags">${p.tags.map(t=>`<span>${t}</span>`).join('')}</div>
           <a href="${p.href}" target="_blank" class="proj-link">View Project ↗</a>
