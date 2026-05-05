@@ -319,17 +319,23 @@ document.querySelectorAll('.section-title').forEach(el => titleRevealObserver.ob
    ============================================================ */
 const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789·';
 
+// Store originals before any observer can touch them
+document.querySelectorAll('.section-label').forEach(el => {
+  el.dataset.original = el.textContent;
+});
+
 const labelScrambleObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       const el = entry.target;
-      const original = el.textContent;
+      const original = el.dataset.original || el.textContent;
+      if (!original) return;
       let iter = 0;
       const interval = setInterval(() => {
         el.textContent = original
           .split('')
           .map((char, i) => {
-            if (i < iter || char === ' ') return original[i];
+            if (i < iter || char === ' ' || char === '·') return original[i];
             return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
           })
           .join('');
@@ -342,7 +348,7 @@ const labelScrambleObserver = new IntersectionObserver((entries) => {
       labelScrambleObserver.unobserve(el);
     }
   });
-}, { threshold: 0.5 });
+}, { threshold: 0.3 });
 
 document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.observe(el));
 
