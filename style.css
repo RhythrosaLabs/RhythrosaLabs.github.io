@@ -2205,6 +2205,16 @@ footer {
 @media (max-width: 900px) {
   nav { padding: 1rem 1.5rem; }
   .nav-links { display: none; }
+  .nav-built { display: none; }
+
+  /* Move theme switcher to bottom-centre so it doesn't clash with nav logo */
+  .theme-switcher {
+    top: auto;
+    bottom: 1.25rem;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
 
   .hero {
     flex-direction: column;
@@ -2235,6 +2245,23 @@ footer {
   .project-item { grid-template-columns: 1fr; gap: 0.75rem; }
   .project-meta { flex-direction: row; align-items: center; gap: 1rem; }
 
+  /* Carousel — reduce padding so content isn't squished */
+  .pcarousel-slide {
+    padding: 2rem 1.5rem 1.5rem;
+    height: auto;
+    min-height: 260px;
+  }
+  .pcarousel-bg-num {
+    font-size: 7rem;
+    right: 1rem;
+    bottom: -0.75rem;
+  }
+  .pcarousel-nav {
+    padding: 0.75rem 1.25rem;
+    gap: 0.5rem;
+  }
+  .pcarousel-stat-row { gap: 1.25rem; }
+
   footer { padding: 1.5rem; }
   .footer-inner { flex-direction: column; gap: 0.5rem; text-align: center; }
 }
@@ -2244,4 +2271,25 @@ footer {
   .hero-cta { flex-direction: column; }
   .projects-more { flex-direction: column; }
   .hero-panel { height: 300px; }
+
+  /* Even tighter carousel on small phones */
+  .pcarousel-slide {
+    padding: 1.5rem 1rem 1.25rem;
+    min-height: 220px;
+  }
+  .pcarousel-bg-num { font-size: 5rem; }
+  .pcarousel-nav {
+    padding: 0.6rem 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .pcarousel-counter { min-width: unset; }
+  .pcarousel-title { font-size: clamp(1.3rem, 6vw, 1.8rem); }
+
+  /* Projects header stacks on tiny screens */
+  .projects-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
 }
