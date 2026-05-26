@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bowmaster Prelude — Retro Archery Defense</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="noise"></div>
+
+  <!-- Game Shell -->
+  <div class="game-container">
+    <header class="game-header">
+      <div class="header-left">
+        <a href="../index.html" class="back-link">← Return to Portfolio</a>
+        <h1>BOWMASTER PRELUDE</h1>
+        <p class="tagline">An Archery Tower Defense Classic Emulation</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-box">
+          <span class="lbl">GOLD</span>
+          <span class="val" id="hudGold">0</span>
+        </div>
+        <div class="stat-box">
+          <span class="lbl font-red">WALL HP</span>
+          <span class="val font-red" id="hudHp">1000/1000</span>
+        </div>
+        <div class="stat-box">
+          <span class="lbl font-accent">WAVE</span>
+          <span class="val font-accent" id="hudWave">1</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="game-screen-wrapper">
+      <!-- Welcome/Title Screen Overlay -->
+      <div id="startScreen" class="overlay-screen active">
+        <div class="overlay-content">
+          <div class="game-logo-art">🏹💥🛡️</div>
+          <h2 class="arcade-title">BOWMASTER</h2>
+          <p class="arcade-sub">PRELUDE REMAKE</p>
+          <p class="game-intro">
+            An oncoming army is marching towards your castle! Aim, power up, and loose gravity-based arrows. Upgrade your equipment, hire auxiliary archers, buy elemental spells, and defend your walls!
+          </p>
+          <div class="controls-guide">
+            <div class="control-item">
+              <span class="key">Mouse Drag &amp; Pull</span>
+              <span class="desc">Aim &amp; Adjust Arrow Velocity</span>
+            </div>
+            <div class="control-item">
+              <span class="key">Release mouse click</span>
+              <span class="desc">Shoot arrow</span>
+            </div>
+            <div class="control-item">
+              <span class="key">1, 2, 3, 4 Keys</span>
+              <span class="desc">Equip Special Arrows (Normal, Fire, Ice, Bomb)</span>
+            </div>
+          </div>
+          <button id="startGameBtn" class="btn-primary">START PRELUDE</button>
+        </div>
+      </div>
+
+      <!-- Canvas Interface -->
+      <canvas id="gameCanvas" width="960" height="540"></canvas>
+
+      <!-- Active Ability/Arrow Selector HUD Overlay on gameplay -->
+      <div id="gameHudSelect" class="ability-selector">
+        <div class="ability-slot active" id="slotNormal" data-type="normal" title="Normal Arrow (Hotkey: 1)">
+          <div class="slot-icon">🏹</div>
+          <div class="slot-count">∞</div>
+          <div class="slot-key">1</div>
+        </div>
+        <div class="ability-slot locked" id="slotFire" data-type="fire" title="Fire Arrow (Hotkey: 2)">
+          <div class="slot-icon">🔥</div>
+          <div class="slot-count" id="fireCount">0</div>
+          <div class="slot-key">2</div>
+        </div>
+        <div class="ability-slot locked" id="slotIce" data-type="ice" title="Ice Arrow (Hotkey: 3)">
+          <div class="slot-icon">❄️</div>
+          <div class="slot-count" id="iceCount">0</div>
+          <div class="slot-key">3</div>
+        </div>
+        <div class="ability-slot locked" id="slotBomb" data-type="bomb" title="Bomb Arrow (Hotkey: 4)">
+          <div class="slot-icon">💣</div>
+          <div class="slot-count" id="bombCount">0</div>
+          <div class="slot-key">4</div>
+        </div>
+      </div>
+
+      <!-- Shop Overlay (Showed between waves) -->
+      <div id="shopScreen" class="overlay-screen">
+        <div class="overlay-content shop-layout">
+          <h2>CASTLE UPGRADE SHOP</h2>
+          <p class="shop-sub">Prepare for the next wave of invaders</p>
+          
+          <div class="shop-tabs">
+            <button class="shop-tab active" data-tab="bow">Weapons</button>
+            <button class="shop-tab" data-tab="castle">Castle &amp; Soldiers</button>
+            <button class="shop-tab" data-tab="spells">Magic &amp; Special</button>
+          </div>
+
+          <div class="shop-items-container">
+            <!-- Bow Upgrades Tab -->
+            <div class="shop-tab-content active" id="tab-bow">
+              <div class="shop-card" data-upgrade="damage">
+                <div class="card-icon">⚡</div>
+                <div class="card-info">
+                  <h4>Arrow Damage</h4>
+                  <p class="desc">Increases standard arrow base damage.</p>
+                  <p class="stats">Current Level: <span class="v-level">1</span> (+20% Dmg)</p>
+                </div>
+                <button class="btn-buy" id="buyDamage">Cost: 150g</button>
+              </div>
+
+              <div class="shop-card" data-upgrade="multishot">
+                <div class="card-icon">🏹🏹</div>
+                <div class="card-info">
+                  <h4>Multishot Arrow</h4>
+                  <p class="desc">Fires multiple arrows in a fan arc.</p>
+                  <p class="stats">Current Level: <span class="v-level">0</span> (Single)</p>
+                </div>
+                <button class="btn-buy" id="buyMultishot">Cost: 500g</button>
+              </div>
+
+              <div class="shop-card" data-upgrade="firerate">
+                <div class="card-icon">⏱️</div>
+                <div class="card-info">
+                  <h4>Aim Reload Speed</h4>
+                  <p class="desc">Reduces arrow reloading and aiming rate.</p>
+                  <p class="stats">Current Level: <span class="v-level">1</span></p>
+                </div>
+                <button class="btn-buy" id="buyFirerate">Cost: 200g</button>
+              </div>
+            </div>
+
+            <!-- Castle Tab -->
+            <div class="shop-tab-content" id="tab-castle">
+              <div class="shop-card" data-upgrade="wallHp">
+                <div class="card-icon">🛡️</div>
+                <div class="card-info">
+                  <h4>Strengthen Walls</h4>
+                  <p class="desc">Adds +250 Max Wall HP.</p>
+                  <p class="stats">HP: <span class="v-level">1000</span></p>
+                </div>
+                <button class="btn-buy" id="buyWallHp">Cost: 100g</button>
+              </div>
+
+              <div class="shop-card" data-upgrade="repair">
+                <div class="card-icon">🔨</div>
+                <div class="card-info">
+                  <h4>Wall Repairmen</h4>
+                  <p class="desc">Auto-repairs wall health by 10/sec outside battle.</p>
+                  <p class="stats">Current Level: <span class="v-level">0</span></p>
+                </div>
+                <button class="btn-buy" id="buyRepair">Cost: 300g</button>
+              </div>
+
+              <div class="shop-card" data-upgrade="archers">
+                <div class="card-icon">👥</div>
+                <div class="card-info">
+                  <h4>Tower Sentry Archers</h4>
+                  <p class="desc">Hires automatic CPU archers to shoot at invaders.</p>
+                  <p class="stats">Archers: <span class="v-level">0</span>/5</p>
+                </div>
+                <button class="btn-buy" id="buyArchers">Cost: 400g</button>
+              </div>
+            </div>
+
+            <!-- Spells Tab -->
+            <div class="shop-tab-content" id="tab-spells">
+              <div class="shop-card" data-upgrade="buyFire">
+                <div class="card-icon">🔥</div>
+                <div class="card-info">
+                  <h4>Unlock / Buy Fire Ammo</h4>
+                  <p class="desc">Buy bundle of +10 Explosive Fire arrows.</p>
+                  <p class="stats">Owned: <span class="v-level" id="ownedFire">0</span></p>
+                </div>
+                <button class="btn-buy" id="buyFireAmmo">Cost: 80g</button>
+              </div>
+
+              <div class="shop-card" data-upgrade="buyIce">
+                <div class="card-icon">❄️</div>
+                <div class="card-info">
+                  <h4>Unlock / Buy Ice Ammo</h4>
+                  <p class="desc">Buy bundle of +10 Freezing Ice arrows.</p>
+                  <p class="stats">Owned: <span class="v-level" id="ownedIce">0</span></p>
+                </div>
+                <button class="btn-buy" id="buyIceAmmo">Cost: 80g</button>
+              </div>
+
+              <div class="shop-card" data-upgrade="buyBomb">
+                <div class="card-icon">💣</div>
+                <div class="card-info">
+                  <h4>Unlock / Buy Bomb Ammo</h4>
+                  <p class="desc">Buy bundle of +5 Highly Destructive Bomb arrows.</p>
+                  <p class="stats">Owned: <span class="v-level" id="ownedBomb">0</span></p>
+                </div>
+                <button class="btn-buy" id="buyBombAmmo">Cost: 150g</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="shop-footer">
+            <button id="nextWaveBtn" class="btn-primary">START NEXT WAVE</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Over Overlay -->
+      <div id="gameOverScreen" class="overlay-screen">
+        <div class="overlay-content">
+          <div class="skull-art">💀</div>
+          <h2 class="arcade-title text-red">DEFEAT</h2>
+          <p class="game-intro">Your castle walls have crumbled to dust under the heavy weight of the enemy vanguard.</p>
+          <div id="gameOverStats" class="game-over-stats">
+            <p>Waves Cleared: <span id="goWave">0</span></p>
+            <p>Gold Earned: <span id="goGold">0</span></p>
+          </div>
+          <button id="restartGameBtn" class="btn-primary">TRY AGAIN</button>
+        </div>
+      </div>
+
+      <!-- Victory Screen (e.g. Cleared all 20 waves) -->
+      <div id="victoryScreen" class="overlay-screen">
+        <div class="overlay-content">
+          <div class="crown-art">👑</div>
+          <h2 class="arcade-title text-accent">VICTORY</h2>
+          <p class="game-intro font-accent">YOU ARE THE BOWMASTER!</p>
+          <p>You have defended the realm and successfully crushed all 20 waves of the enemy legion!</p>
+          <button id="victoryHomeBtn" class="btn-primary">PLAY ENDLESS MODE</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

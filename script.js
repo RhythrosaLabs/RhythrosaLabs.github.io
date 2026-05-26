@@ -368,105 +368,26 @@ const labelScrambleObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.observe(el));
 
 /* ============================================================
-   PROJECTS — LIST / GRID / SLIDE VIEW TOGGLE + CAROUSEL
+   PROJECTS — LIST / GRID VIEW TOGGLE
    ============================================================ */
 (function () {
   const list        = document.querySelector('.projects-list');
-  const carousel    = document.getElementById('projectsCarousel');
   const grid        = document.getElementById('projectsGrid');
-  const track       = document.getElementById('pcarouselTrack');
-  const dotsWrap    = document.getElementById('pcarDots');
-  const counter     = document.getElementById('pcarCounter');
-  const prevBtn     = document.getElementById('pcarPrev');
-  const nextBtn     = document.getElementById('pcarNext');
-  const progressBar = document.getElementById('pcarProgressBar');
   const btnList     = document.getElementById('viewList');
   const btnGrid     = document.getElementById('viewGrid');
-  const btnSlide    = document.getElementById('viewSlide');
-  if (!list || !carousel || !btnList || !btnSlide) return;
+  if (!list || !btnList) return;
 
   const items = document.querySelectorAll('.project-item');
-  const total = items.length;
-  let current = 0;
-  let autoTimer = null;
-  let progressAnim = null;
-  const AUTO_MS = 5000;
 
-  // Per-project stat data (title → array of {label, value})
-  const PROJECT_STATS = {
-    'Ottomate':                         [{ label: 'TYPE', value: 'AI Workbench' },    { label: 'CONNECTORS', value: '190+' },     { label: 'SKILLS', value: '200+' }],
-    'brAInstormer':                     [{ label: 'TYPE', value: 'AI Suite' },        { label: 'PLATFORM', value: 'Streamlit' },  { label: 'BUILT IN', value: '< 2 weeks' }],
-    'Trinkets — Interactive Portfolio': [{ label: 'TYPE', value: 'Interactive Art' }, { label: 'ENGINE', value: 'Unity' },        { label: 'FORMAT', value: '3D Museum' }],
-    'Game Maker':                       [{ label: 'TYPE', value: 'Dev Tool' },        { label: 'PLATFORM', value: 'Streamlit' },  { label: 'AI MODELS', value: '4' }],
-    'Prism Rider':                      [{ label: 'TYPE', value: 'Indie Game' },      { label: 'ENGINE', value: 'Unity' },        { label: 'GENRE', value: 'Rhythm Kart' }],
-    'AR/XR Sound Design — Rock Paper Reality': [{ label: 'TYPE', value: 'Enterprise XR' }, { label: 'CLIENTS', value: '8+' },      { label: 'FORMAT', value: 'AR / XR' }],
-    'Mend — Music Video':               [{ label: 'TYPE', value: 'Music Video' },     { label: 'TECHNIQUE', value: 'AI Animation' }, { label: 'YEAR', value: '2022' }],
-    'Soundstorm':                       [{ label: 'TYPE', value: 'Audio Tool' },      { label: 'PLATFORM', value: 'Streamlit' },  { label: 'GENRE', value: 'Experimental' }],
-    'DuoGPT':                           [{ label: 'TYPE', value: 'AI Experiment' },   { label: 'MODEL', value: 'GPT-4' },         { label: 'FORMAT', value: 'AI-to-AI' }],
-    'LabelFlow':                        [{ label: 'TYPE', value: 'Web App' },         { label: 'FRAMEWORK', value: 'React 19' },  { label: 'MODULES', value: '15' }],
-    'Autonomous Business Platform':     [{ label: 'TYPE', value: 'Automation' },      { label: 'BACKEND', value: 'FastAPI' },     { label: 'STACK', value: 'Ray + Streamlit' }],
-    'Multi-Agent Viral Video Maker':    [{ label: 'TYPE', value: 'Video Pipeline' }, { label: 'AGENTS', value: 'Multi-Agent' },  { label: 'OUTPUT', value: 'HD + Audio' }],
-    'AI Blog Writer':                   [{ label: 'TYPE', value: 'Web App' },         { label: 'PLATFORM', value: 'Streamlit' },  { label: 'FORMAT', value: 'Browser-based' }],
-    'Streamlit Components':             [{ label: 'TYPE', value: 'Component Lib' },  { label: 'COMPONENTS', value: '6' },        { label: 'FRAMEWORK', value: 'Streamlit' }],
-    'The Raven — Music Video':          [{ label: 'TYPE', value: 'Music Video' },     { label: 'TECHNIQUE', value: 'SD Interp.' }, { label: 'YEAR', value: '2022' }],
-  };
-
-  // Map tags → category label
-  function categoryFrom(tags) {
-    const t = tags.map(x => x.toLowerCase()).join(' ');
-    if (t.includes('music video') || t.includes('cinematic') || t.includes('experimental')) return 'FILM · VISUAL';
-    if (t.includes('unity') || t.includes('game'))   return 'GAME DEV';
-    if (t.includes('ar') || t.includes('xr'))        return 'AR / XR';
-    if (t.includes('audio') || t.includes('sound'))  return 'AUDIO TECH';
-    if (t.includes('typescript') || t.includes('react')) return 'WEB · FRONTEND';
-    if (t.includes('python') || t.includes('fastapi')) return 'BACKEND · AI';
-    if (t.includes('ai') || t.includes('agent') || t.includes('automation')) return 'AI · AUTOMATION';
-    return 'PROJECT';
-  }
-
-  // Build slides
-  items.forEach((item, idx) => {
+  // Build grid cards
+  items.forEach((item) => {
     const num   = item.querySelector('.project-num')?.textContent.trim() || '';
     const tags  = [...item.querySelectorAll('.project-tags-inline span')].map(s => s.textContent.trim());
     const title = item.querySelector('.project-content h3')?.textContent.trim() || '';
-    const desc  = item.querySelector('.project-content p')?.innerHTML.trim() || '';
     const links = [...item.querySelectorAll('.project-links a')].map(a => ({
       href: a.getAttribute('href'), text: a.textContent.trim()
     }));
-    const cat   = categoryFrom(tags);
-    const stats = (PROJECT_STATS[title] || [{ label: 'TYPE', value: 'Project' }]).slice(0, 3);
 
-    const slide = document.createElement('div');
-    slide.className = 'pcarousel-slide' + (idx === 0 ? ' active' : '');
-    slide.innerHTML =
-      '<div class="pcarousel-category">' + cat + '</div>' +
-      '<div class="pcarousel-slide-top">' +
-        '<span class="pcarousel-num">' + num + '</span>' +
-        '<div class="pcarousel-tags">' + tags.map(t => '<span>' + t + '</span>').join('') + '</div>' +
-      '</div>' +
-      '<div class="pcarousel-bg-num">' + num + '</div>' +
-      '<h3 class="pcarousel-title">' + title + '</h3>' +
-      '<div class="pcarousel-stat-row">' +
-        stats.map(s =>
-          '<div class="pcarousel-stat">' +
-            '<span class="pcarousel-stat-label">' + s.label + '</span>' +
-            '<span class="pcarousel-stat-value">' + s.value + '</span>' +
-          '</div>'
-        ).join('') +
-      '</div>' +
-      '<p class="pcarousel-desc">' + desc + '</p>' +
-      '<div class="pcarousel-links">' +
-        links.map(l => '<a href="' + l.href + '" target="_blank">' + l.text + '</a>').join('') +
-      '</div>';
-    track.appendChild(slide);
-
-    // Dot
-    const dot = document.createElement('button');
-    dot.className = 'pcarousel-dot' + (idx === 0 ? ' active' : '');
-    dot.addEventListener('click', () => { goTo(idx); resetAuto(); });
-    dotsWrap.appendChild(dot);
-
-    // Grid card
     if (grid) {
       const card = document.createElement('div');
       card.className = 'pgrid-item';
@@ -480,103 +401,32 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
     }
   });
 
-  function updateCounter() {
-    counter.textContent =
-      String(current + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
-  }
-
-  function goTo(idx) {
-    const slides = track.querySelectorAll('.pcarousel-slide');
-    const dots   = dotsWrap.querySelectorAll('.pcarousel-dot');
-    slides[current].classList.remove('active');
-    dots[current].classList.remove('active');
-    current = ((idx % total) + total) % total;
-    slides[current].classList.add('active');
-    dots[current].classList.add('active');
-    updateCounter();
-  }
-
-  // Auto-advance with animated progress bar
-  function startProgress() {
-    if (!progressBar) return;
-    if (progressAnim) cancelAnimationFrame(progressAnim);
-    progressBar.style.transition = 'none';
-    progressBar.style.width = '0%';
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        progressBar.style.transition = 'width ' + AUTO_MS + 'ms linear';
-        progressBar.style.width = '100%';
-      });
-    });
-  }
-
-  function startAuto() {
-    stopAuto();
-    startProgress();
-    autoTimer = setTimeout(() => {
-      goTo(current + 1);
-      startAuto();
-    }, AUTO_MS);
-  }
-
-  function stopAuto() {
-    clearTimeout(autoTimer);
-    autoTimer = null;
-    if (progressBar) {
-      progressBar.style.transition = 'none';
-      progressBar.style.width = '0%';
-    }
-  }
-
-  function resetAuto() {
-    if (autoTimer !== null) startAuto(); // only restart if it was running
-  }
-
-  prevBtn.addEventListener('click', () => { goTo(current - 1); resetAuto(); });
-  nextBtn.addEventListener('click', () => { goTo(current + 1); resetAuto(); });
-
-  // Pause on hover
-  carousel.addEventListener('mouseenter', stopAuto);
-  carousel.addEventListener('mouseleave', () => { if (carousel.classList.contains('active')) startAuto(); });
-
-  document.addEventListener('keydown', (e) => {
-    if (!carousel.classList.contains('active')) return;
-    if (e.key === 'ArrowLeft')  { goTo(current - 1); resetAuto(); }
-    if (e.key === 'ArrowRight') { goTo(current + 1); resetAuto(); }
-  });
-
   function setView(mode) {
+    if (mode === 'slide') mode = 'list';
+
     // Hide all
     list.style.display = 'none';
-    carousel.classList.remove('active');
     if (grid) grid.classList.remove('active');
-    stopAuto();
 
-    [btnList, btnGrid, btnSlide].forEach(b => b && b.classList.remove('active'));
+    [btnList, btnGrid].forEach(b => b && b.classList.remove('active'));
 
-    if (mode === 'list') {
+    if (mode === 'grid') {
+      if (grid) grid.classList.add('active');
+      if (btnGrid) btnGrid.classList.add('active');
+    } else {
       list.style.display = '';
       document.querySelectorAll('.project-item').forEach(el => {
         el.style.opacity = '1';
         el.style.transform = 'translateY(0)';
       });
       btnList.classList.add('active');
-    } else if (mode === 'grid') {
-      if (grid) grid.classList.add('active');
-      if (btnGrid) btnGrid.classList.add('active');
-    } else {
-      carousel.classList.add('active');
-      btnSlide.classList.add('active');
-      startAuto();
     }
     localStorage.setItem('ds-proj-view', mode);
   }
 
   btnList.addEventListener('click',  () => setView('list'));
   if (btnGrid) btnGrid.addEventListener('click', () => setView('grid'));
-  btnSlide.addEventListener('click', () => setView('slide'));
 
-  updateCounter();
   setView(localStorage.getItem('ds-proj-view') || 'list');
 }());
 
