@@ -109,3 +109,8 @@ Full client list: Red Bull, Microsoft, Intel, Amazon, Motorola, Lenovo, San Dieg
 
 *© 2026 Daniel Sheils · [MIT License](LICENSE)*
 
+
+
+## Support
+
+If you find this useful, consider supporting via [PayPal](https://paypal.me/noodlebake)
