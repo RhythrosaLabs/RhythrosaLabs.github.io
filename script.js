@@ -611,3 +611,17 @@ document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.
   window.addEventListener('resize', initParticles);
 }());
 /* ==== PANEL END ==== */
+
+// Respect reduced-motion preferences for the project preview films.
+(function () {
+  const preference = window.matchMedia('(prefers-reduced-motion: reduce)');
+  function update() {
+    document.querySelectorAll('.walkthrough-card video').forEach(video => {
+      video.autoplay = !preference.matches;
+      if (preference.matches) video.pause();
+      else video.play().catch(() => {});
+    });
+  }
+  update();
+  preference.addEventListener('change', update);
+}());
