@@ -368,69 +368,6 @@ const labelScrambleObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.section-label').forEach(el => labelScrambleObserver.observe(el));
 
 /* ============================================================
-   PROJECTS — LIST / GRID VIEW TOGGLE
-   ============================================================ */
-(function () {
-  const list        = document.querySelector('.projects-list');
-  const grid        = document.getElementById('projectsGrid');
-  const btnList     = document.getElementById('viewList');
-  const btnGrid     = document.getElementById('viewGrid');
-  if (!list || !btnList) return;
-
-  const items = document.querySelectorAll('.project-item');
-
-  // Build grid cards
-  items.forEach((item) => {
-    const num   = item.querySelector('.project-num')?.textContent.trim() || '';
-    const tags  = [...item.querySelectorAll('.project-tags-inline span')].map(s => s.textContent.trim());
-    const title = item.querySelector('.project-content h3')?.textContent.trim() || '';
-    const links = [...item.querySelectorAll('.project-links a')].map(a => ({
-      href: a.getAttribute('href'), text: a.textContent.trim()
-    }));
-
-    if (grid) {
-      const card = document.createElement('div');
-      card.className = 'pgrid-item';
-      card.innerHTML =
-        '<div class="pgrid-num">' + num + '</div>' +
-        '<div class="pgrid-title">' + title + '</div>' +
-        '<p class="pgrid-desc">' + item.querySelector('.project-content p')?.textContent.trim() + '</p>' +
-        '<div class="pgrid-tags">' + tags.map(t => '<span>' + t + '</span>').join('') + '</div>' +
-        (links.length ? '<a href="' + links[0].href + '" target="_blank" class="pgrid-link">' + links[0].text + '</a>' : '');
-      grid.appendChild(card);
-    }
-  });
-
-  function setView(mode) {
-    if (mode === 'slide') mode = 'list';
-
-    // Hide all
-    list.style.display = 'none';
-    if (grid) grid.classList.remove('active');
-
-    [btnList, btnGrid].forEach(b => b && b.classList.remove('active'));
-
-    if (mode === 'grid') {
-      if (grid) grid.classList.add('active');
-      if (btnGrid) btnGrid.classList.add('active');
-    } else {
-      list.style.display = '';
-      document.querySelectorAll('.project-item').forEach(el => {
-        el.style.opacity = '1';
-        el.style.transform = 'translateY(0)';
-      });
-      btnList.classList.add('active');
-    }
-    localStorage.setItem('ds-proj-view', mode);
-  }
-
-  btnList.addEventListener('click',  () => setView('list'));
-  if (btnGrid) btnGrid.addEventListener('click', () => setView('grid'));
-
-  setView(localStorage.getItem('ds-proj-view') || 'list');
-}());
-
-/* ============================================================
    HERO PANEL WIDGET — Terminal only
    ============================================================ */
 (function () {
