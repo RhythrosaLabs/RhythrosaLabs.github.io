@@ -1,119 +1,152 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>AUTONOMOUS BIZ Overview</title>
+<title>Autonomous Business Platform Demo</title>
 <style>
-  :root{--bg:#0a0c10; --bg2:#0e1117; --line:#1e2029; --acc:#22d3a8; --acc2:#7fe8cc; --text:#f0eff5; --dim:#8a8fa3; --green:#3ddc84;}
-  *{box-sizing:border-box;margin:0;padding:0;}
-  html,body{width:960px;height:540px;background:var(--bg);overflow:hidden;font-family:'SF Mono','Menlo',monospace;color:var(--text);}
-  #stage{position:relative;width:960px;height:540px;background:radial-gradient(900px 500px at 50% -8%, rgba(34,211,168,.14), transparent 60%),radial-gradient(700px 400px at 100% 110%, rgba(34,211,168,.08), transparent 60%),linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);}
-  .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:36px 36px;pointer-events:none;}
-  #wave{position:absolute;left:0;right:0;bottom:0;height:120px;display:flex;align-items:flex-end;justify-content:center;gap:4px;opacity:.22;pointer-events:none;}
-  #wave span{width:5px;border-radius:3px;background:linear-gradient(180deg,var(--acc),transparent);animation:bar 1.1s ease-in-out infinite;}
-  @keyframes bar{0%,100%{height:8px;}50%{height:var(--h);}}
-  .scene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;}
-  #s1{animation:f1 2.6s ease forwards;}
-  .logo{display:flex;align-items:center;gap:18px;}
-  .icon{width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--acc),#0f5c49);display:flex;align-items:center;justify-content:center;font-size:30px;opacity:0;transform:scale(.5) rotate(-12deg);animation:pop .6s cubic-bezier(.2,1.5,.4,1) .1s forwards;box-shadow:0 0 40px rgba(34,211,168,.14);}
-  .word{font-size:34px;font-weight:800;letter-spacing:.5px;opacity:0;transform:translateY(12px);animation:wi .55s ease .3s forwards;white-space:nowrap;}
-  .tag{margin-top:14px;font-size:15px;color:var(--dim);opacity:0;animation:wi .55s ease .7s forwards;text-align:center;max-width:600px;}
-  #s2{animation:f2 3.4s ease forwards;animation-delay:2.5s;}
-  .head{font-size:12.5px;letter-spacing:3px;color:var(--acc2);text-transform:uppercase;margin-bottom:22px;opacity:0;animation:wi .5s ease .05s forwards;}
-  .grid2{display:grid;grid-template-columns:repeat(2,230px);gap:14px;}
-  .card{background:#12141c;border:1px solid var(--line);border-radius:12px;padding:16px 18px;opacity:0;transform:translateY(14px);}
-  .card .ic{font-size:19px;margin-bottom:6px;}
-  .card .t{font-size:13.5px;font-weight:700;margin-bottom:3px;}
-  .card .d{font-size:11px;color:var(--dim);line-height:1.4;}
-  .card:nth-child(1){animation:ci .45s ease .15s forwards;}
-  .card:nth-child(2){animation:ci .45s ease .3s forwards;}
-  .card:nth-child(3){animation:ci .45s ease .45s forwards;}
-  .card:nth-child(4){animation:ci .45s ease .6s forwards;}
-  #s3{animation:f3 3.2s ease forwards;animation-delay:5.6s;flex-direction:column;}
-  .term{width:660px;background:#0d0f14;border:1px solid var(--line);border-radius:12px;box-shadow:0 30px 80px rgba(0,0,0,.55);overflow:hidden;opacity:0;animation:ci .5s ease .1s forwards;}
-  .bar{height:34px;background:#12151c;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid var(--line);}
-  .dot{width:10px;height:10px;border-radius:50%;}
-  .r{background:#ff5f57;} .y{background:#febc2e;} .g{background:#28c840;}
-  .tt{margin-left:12px;font-size:11px;color:var(--dim);}
-  .tbody{padding:20px 24px;font-size:13.5px;line-height:1.95;}
-  .prompt{color:var(--green);} .comment{color:var(--dim);}
-  .out{color:var(--acc2);}
-  .cursor{display:inline-block;width:8px;height:15px;background:var(--acc);vertical-align:-2px;animation:bl 1s steps(1) infinite;}
-  #s4{animation:f4 3.8s ease forwards;animation-delay:8.6s;flex-direction:column;}
-  .stats{display:flex;gap:44px;margin-bottom:6px;}
-  .stat{text-align:center;opacity:0;transform:translateY(12px);}
-  .stat:nth-child(1){animation:ci .5s ease .1s forwards;}
-  .stat:nth-child(2){animation:ci .5s ease .25s forwards;}
-  .stat:nth-child(3){animation:ci .5s ease .4s forwards;}
-  .num{font-size:30px;font-weight:800;color:var(--acc);letter-spacing:-.5px;}
-  .lbl{margin-top:6px;font-size:10.5px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;}
-  .ot{font-size:26px;font-weight:800;margin-top:20px;opacity:0;animation:ci .5s ease .55s forwards;}
-  .os{font-size:13px;color:var(--dim);margin-top:6px;opacity:0;animation:ci .5s ease .7s forwards;}
-  .orepo{margin-top:18px;padding:10px 22px;border:1px solid var(--line);border-radius:999px;font-size:12.5px;color:var(--acc2);background:#12151c;opacity:0;animation:ci .5s ease .85s forwards;}
-  @keyframes pop{to{opacity:1;transform:scale(1) rotate(0);}}
-  @keyframes wi{to{opacity:1;transform:translateY(0);}}
-  @keyframes ci{to{opacity:1;transform:translateY(0);}}
-  @keyframes bl{50%{opacity:0;}}
-  @keyframes f1{0%{opacity:0;}10%{opacity:1;}88%{opacity:1;}100%{opacity:0;}}
-  @keyframes f2{0%{opacity:0;}6%{opacity:1;}90%{opacity:1;}100%{opacity:0;}}
-  @keyframes f3{0%{opacity:0;}6%{opacity:1;}90%{opacity:1;}100%{opacity:0;}}
-  @keyframes f4{0%{opacity:0;}8%{opacity:1;}82%{opacity:1;}100%{opacity:0;}}
+  :root{ --bg:#0a0c10; --bg2:#0e1117; --line:#1c2129;
+    --accent:#3ddc84; --accent2:#8ef0b3; --text:#e6e9ef; --dim:#7a8394; --prompt:#4a9eff; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{ width:100%; height:100%; margin:0; background:#000; overflow:hidden;
+    font-family:'SF Mono','Menlo','Consolas',monospace; color:var(--text);
+    display:flex; align-items:center; justify-content:center; }
+  #stage{ position:relative; width:1280px; height:720px; flex-shrink:0; transform-origin:center center;
+    background: radial-gradient(1200px 600px at 50% -10%, rgba(61,220,132,0.10), transparent 60%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%); }
+  .grid-overlay{ position:absolute; inset:0;
+    background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:40px 40px; pointer-events:none; }
+  .scene{ position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; opacity:0; }
+
+  #s1{ animation: f1 3.2s ease forwards; }
+  .logo-row{ display:flex; align-items:center; gap:20px; }
+  .bolt{ font-size:56px; color:var(--accent); filter:drop-shadow(0 0 24px rgba(61,220,132,0.5));
+    opacity:0; transform:scale(0.4); animation: boltIn 0.7s cubic-bezier(.2,1.4,.4,1) 0.15s forwards; }
+  .wordmark{ font-size:44px; font-weight:700; letter-spacing:0.5px;
+    opacity:0; transform:translateY(14px); animation: wordIn 0.7s ease 0.35s forwards; }
+  .tagline{ margin-top:18px; font-size:17px; color:var(--dim);
+    opacity:0; animation: wordIn 0.7s ease 0.85s forwards; }
+
+  #s2{ animation: f2 6.6s ease forwards; animation-delay:3.0s; }
+  .term-window{ width:900px; height:400px; background:#0d0f14; border:1px solid var(--line);
+    border-radius:12px; box-shadow:0 30px 80px rgba(0,0,0,0.55); overflow:hidden; }
+  .term-bar{ height:38px; background:#12151c; display:flex; align-items:center; gap:8px; padding:0 14px;
+    border-bottom:1px solid var(--line); }
+  .dot{ width:11px; height:11px; border-radius:50%; }
+  .dot.r{background:#ff5f57;} .dot.y{background:#febc2e;} .dot.g{background:#28c840;}
+  .term-title{ margin-left:14px; font-size:12px; color:var(--dim); }
+  .term-body{ padding:22px 26px; font-size:16px; line-height:1.9; }
+  .prompt{ color:var(--prompt); } .comment{ color:var(--dim); }
+  .cursor{ display:inline-block; width:9px; height:18px; background:var(--accent); vertical-align:-3px;
+    animation:blink 1s steps(1) infinite; }
+
+  #s3{ animation: f3 8.4s ease forwards; animation-delay:9.4s; flex-direction:column; }
+  .head{ font-size:15px; letter-spacing:3px; color:var(--accent2); text-transform:uppercase;
+    margin-bottom:26px; opacity:0; animation: wordIn 0.6s ease 0.1s forwards; }
+  .card-grid{ display:grid; grid-template-columns:repeat(3, 260px); gap:20px; }
+  .card{ background:#11141b; border:1px solid var(--line); border-radius:12px; padding:20px 20px 18px;
+    opacity:0; transform:translateY(18px); }
+  .card .icon{ font-size:22px; margin-bottom:10px; }
+  .card .title{ font-size:15px; font-weight:700; margin-bottom:6px; }
+  .card .desc{ font-size:12.5px; color:var(--dim); line-height:1.5; }
+  .card:nth-child(1){ animation: cIn 0.55s ease 0.35s forwards; }
+  .card:nth-child(2){ animation: cIn 0.55s ease 0.55s forwards; }
+  .card:nth-child(3){ animation: cIn 0.55s ease 0.75s forwards; }
+  .card:nth-child(4){ animation: cIn 0.55s ease 0.95s forwards; }
+  .card:nth-child(5){ animation: cIn 0.55s ease 1.15s forwards; }
+  .card:nth-child(6){ animation: cIn 0.55s ease 1.35s forwards; }
+
+  #s4{ animation: f4 5.4s ease forwards; animation-delay:17.6s; }
+  .outro-bolt{ font-size:40px; color:var(--accent); opacity:0; animation:cIn 0.6s ease 0.15s forwards; }
+  .outro-title{ font-size:32px; font-weight:800; margin-top:14px; opacity:0; animation:cIn 0.6s ease 0.3s forwards; }
+  .outro-sub{ font-size:15px; color:var(--dim); margin-top:10px; opacity:0; animation:cIn 0.6s ease 0.45s forwards; }
+  .outro-repo{ margin-top:26px; padding:12px 26px; border:1px solid var(--line); border-radius:999px;
+    font-size:15px; color:var(--accent2); background:#12151c; opacity:0; animation:cIn 0.6s ease 0.6s forwards; }
+  .outro-star{ margin-top:18px; font-size:13px; color:var(--dim); opacity:0; animation:cIn 0.6s ease 0.75s forwards; }
+
+  @keyframes boltIn{ to{opacity:1; transform:scale(1);} }
+  @keyframes wordIn{ to{opacity:1; transform:translateY(0);} }
+  @keyframes cIn{ to{opacity:1; transform:translateY(0);} }
+  @keyframes blink{ 50%{opacity:0;} }
+  @keyframes f1{ 0%{opacity:0;} 8%{opacity:1;} 84%{opacity:1;} 100%{opacity:0;} }
+  @keyframes f2{ 0%{opacity:0;} 5%{opacity:1;} 90%{opacity:1;} 100%{opacity:0;} }
+  @keyframes f3{ 0%{opacity:0;} 4%{opacity:1;} 92%{opacity:1;} 100%{opacity:0;} }
+  @keyframes f4{ 0%{opacity:0;} 6%{opacity:1;} 100%{opacity:1;} }
 </style>
 </head>
 <body>
 <div id="stage">
-  <div class="grid"></div>
-  <div id="wave"></div>
+  <div class="grid-overlay"></div>
+
   <div class="scene" id="s1">
-    <div class="logo"><div class="icon">🏢</div><div class="word">AUTONOMOUS BIZ</div></div>
-    <div class="tag">The ultimate AI-powered business automation suite &mdash; marketing, content & commerce on autopilot</div>
+    <div class="logo-row"><div class="bolt">🏢</div><div class="wordmark">AUTONOMOUS BUSINESS PLATFORM</div></div>
+    <div class="tagline">AI-powered marketing, content & e-commerce automation</div>
   </div>
+
   <div class="scene" id="s2">
-    <div class="head">Core Capabilities</div>
-    <div class="grid2">
-      <div class="card"><div class="ic">🤖</div><div class="t">Otto AI Assistant</div><div class="d">Multi-agent AI with 100+ slash commands</div></div>
-      <div class="card"><div class="ic">⚙️</div><div class="t">Parallel Campaigns</div><div class="d">6-asset campaigns generated 7x faster via Ray</div></div>
-      <div class="card"><div class="ic">🛒</div><div class="t">E-Commerce Sync</div><div class="d">Shopify syncing, Printify mockups, inventory</div></div>
-      <div class="card"><div class="ic">📱</div><div class="t">Social Automation</div><div class="d">YouTube, X, Pinterest, Instagram, TikTok & more</div></div>
+    <div class="term-window">
+      <div class="term-bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+        <div class="term-title">bash — autonomous-business-platform</div></div>
+      <div class="term-body" id="term-body"></div>
     </div>
   </div>
+
   <div class="scene" id="s3">
-    <div class="term">
-      <div class="bar"><div class="dot r"></div><div class="dot y"></div><div class="dot g"></div><div class="tt">otto — generate campaign</div></div>
-      <div class="tbody">
-        <div><span class="prompt">$</span> otto generate campaign --product tee</div>
-        <div class="comment">&gt; rendering 6 assets in parallel (Ray)...</div>
-        <div class="out">&gt; campaign ready · 7x faster</div>
-        <div><span class="prompt">$</span> _<span class="cursor"></span></div>
-      </div>
+    <div class="head">Key Capabilities</div>
+    <div class="card-grid">
+      <div class="card"><div class="icon">📢</div><div class="title">Marketing Automation</div><div class="desc">Production-ready campaign generation, end to end.</div></div>
+      <div class="card"><div class="icon">✍️</div><div class="title">Content Generation</div><div class="desc">AI-driven copy, media, and creative assets on demand.</div></div>
+      <div class="card"><div class="icon">🛒</div><div class="title">E-Commerce Integration</div><div class="desc">Connects directly to Shopify for live storefront sync.</div></div>
+      <div class="card"><div class="icon">🕸️</div><div class="title">Ray-Powered</div><div class="desc">Distributed multi-agent orchestration at scale.</div></div>
+      <div class="card"><div class="icon">⚡</div><div class="title">FastAPI Backend</div><div class="desc">Async API layer for agent workflows and webhooks.</div></div>
+      <div class="card"><div class="icon">📊</div><div class="title">Streamlit Dashboard</div><div class="desc">Live control panel for every automated workflow.</div></div>
     </div>
   </div>
+
   <div class="scene" id="s4">
-    <div class="stats">
-      <div class="stat"><div class="num">6★</div><div class="lbl">GitHub Stars</div></div>
-      <div class="stat"><div class="num">Ray</div><div class="lbl">+FastAPI</div></div>
-      <div class="stat"><div class="num">Py</div><div class="lbl">Python</div></div>
-    </div>
-    <div class="ot">Autonomous Business Platform</div>
-    <div class="os">by Rhythrosa Labs</div>
-    <div class="orepo">github.com/RhythrosaLabs/autonomous-business-platform</div>
+    <div class="outro-bolt">🏢</div>
+    <div class="outro-title">Autonomous Business Platform</div>
+    <div class="outro-sub">Python · Ray · FastAPI · Streamlit · Self-hosted</div>
+    <div class="outro-repo">github.com/RhythrosaLabs/autonomous-business-platform</div>
+    <div class="outro-star">⭐ Star it, clone it, automate the business.</div>
   </div>
 </div>
+
 <script>
-  var w = document.getElementById('wave');
-  var n = 70;
-  for (var i=0;i<n;i++){
-    var s = document.createElement('span');
-    var h = 14 + Math.random()*90;
-    s.style.setProperty('--h', h+'px');
-    s.style.animationDelay = (Math.random()*1.1)+'s';
-    s.style.animationDuration = (0.8+Math.random()*0.8)+'s';
-    w.appendChild(s);
+  (function(){
+    var stage = document.getElementById('stage');
+    function fit(){
+      var scale = Math.min(window.innerWidth/1280, window.innerHeight/720);
+      stage.style.transform = 'scale(' + scale + ')';
+    }
+    window.addEventListener('resize', fit);
+    window.addEventListener('load', fit);
+    fit();
+  })();
+</script>
+<script>
+  const lines = [
+    "$ git clone https://github.com/RhythrosaLabs/autonomous-business-platform.git",
+    "$ cd autonomous-business-platform",
+    "$ pip install -r requirements.txt",
+    "$ streamlit run app.py",
+    "\n✓ Ray cluster online · agents ready"
+  ];
+  const body = document.getElementById('term-body');
+  const full = lines.join("\n");
+  let i = 0;
+  function typeChar(){
+    if(i <= full.length){
+      body.innerHTML = full.slice(0, i).replace(/\n/g,'<br>') + '<span class="cursor"></span>';
+      i += 2; setTimeout(typeChar, 22);
+    } else {
+      body.innerHTML = full.replace(/\n/g,'<br>') + '<span class="cursor"></span>';
+    }
   }
+  setTimeout(typeChar, 3100);
 </script>
-<style>html,body{width:100%;height:100%}#stage{position:absolute;left:50%;top:50%;transform-origin:center}</style><script>
-function fitPreview(){var k=Math.min(innerWidth/960,innerHeight/540);document.getElementById('stage').style.transform='translate(-50%,-50%) scale('+k+')';}
-addEventListener('resize',fitPreview);fitPreview();setInterval(function(){document.getAnimations().forEach(function(a){a.currentTime=0;});},13000);
-</script>
+<script>setTimeout(function(){location.reload();},25000);</script>
 </body>
 </html>
